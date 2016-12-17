@@ -19,9 +19,11 @@ pipelearner.default <- function(data) {
 pipelearner.data.frame <- function(data) {
   pl <- structure(list(
     data = data,
-    # Default .80 train and .20 test set
-    cross_validation_pairs = crossv_mc(data, 1, test = 0.2)
+    cv_pairs = NULL
   ), class = c("pipelearner"))
+
+  # Set default cross-validation pairs
+  pl <- learn_cvpairs(pl)
 
   pl
 }
@@ -31,3 +33,10 @@ pipelearner.data.frame <- function(data) {
 #' @keywords internal
 #' @export
 is.pipelearner <- function(x) inherits(x, "pipelearner")
+
+
+#' Parameters shared by pipelearner methods.
+#'
+#' @name pipelearner_params
+#' @param pl pipelearner object. See \code{\link{pipelearner}}
+NULL
