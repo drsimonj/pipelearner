@@ -6,12 +6,14 @@
 #' @param pl pipelearner object
 #' @export
 pipelearner_fit <- function(pl) {
-  if (length(pl$data) != 3 ||
-      all(names(pl$data) != c("train", "test", ".id")) ||
-      all(purrr::map_chr(pl$data, class) == c("list", "list", "character"))) {
 
-    pl$data <- modelr::crossv_mc(pl$data, 1)
-  }
+  # If required, coerce data frame to default .80 train and .20 test set
+  # if (length(pl$data) != 3 ||
+  #     all(names(pl$data) != c("train", "test", ".id")) ||
+  #     all(purrr::map_chr(pl$data, class) == c("list", "list", "character"))) {
+  #
+  #   pl$data <- modelr::crossv_mc(pl$data, 1, test = 0.2)
+  # }
 
   pl
 
