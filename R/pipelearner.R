@@ -20,7 +20,7 @@ pipelearner.data.frame <- function(data) {
   pl <- structure(list(
     data = data,
     # Default .80 train and .20 test set
-    cross_validation_pairs = modelr::crossv_mc(data, 1, test = 0.2)
+    cross_validation_pairs = crossv_mc(data, 1, test = 0.2)
   ), class = c("pipelearner"))
 
   pl
