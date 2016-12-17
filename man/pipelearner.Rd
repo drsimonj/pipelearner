@@ -4,7 +4,7 @@
 \alias{pipelearner}
 \title{Create a new pipe learner}
 \usage{
-pipelearner(data = NULL)
+pipelearner(data)
 }
 \arguments{
 \item{data}{Data frame containing all variables needed by learning algorithm

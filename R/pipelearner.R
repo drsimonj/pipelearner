@@ -6,12 +6,12 @@
 #' @param data Data frame containing all variables needed by learning algorithm
 #'   formulae.
 #' @export
-pipelearner <- function(data = NULL) {
+pipelearner <- function(data) {
   UseMethod("pipelearner")
 }
 
 #' @export
-pipelearner.default <- function(data = NULL) {
+pipelearner.default <- function(data) {
   pipelearner.data.frame(as.data.frame(data))
 }
 
