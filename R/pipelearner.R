@@ -23,3 +23,9 @@ pipelearner.data.frame <- function(data) {
 
   pl
 }
+
+#' Reports whether x is a pipelearner object
+#' @param x An object to test
+#' @keywords internal
+#' @export
+is.pipelearner <- function(x) inherits(x, "pipelearner")
