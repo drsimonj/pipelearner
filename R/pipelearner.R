@@ -19,11 +19,13 @@ pipelearner.default <- function(data) {
 pipelearner.data.frame <- function(data) {
   pl <- structure(list(
     data = data,
-    cv_pairs = NULL
+    cv_pairs = NULL,
+    train_ps = NULL
   ), class = c("pipelearner"))
 
-  # Set default cross-validation pairs
-  pl <- learn_cvpairs(pl)
+  # Set defaults
+  pl <- learn_cvpairs(pl)   # cross-validation pairs
+  pl <- learn_curves(pl)    # learning curves
 
   pl
 }
