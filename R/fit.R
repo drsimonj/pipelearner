@@ -12,8 +12,16 @@ fit_learners <- function(pl) {
 
   # THIS IS A TEMPORARY TRIAL
   # TODO: fit to all cross validation pairs and training rates
-  pl$models <- pl$models %>%
-    dplyr::mutate(fit = purrr::invoke_map(.$.f, .$params, data = pl$data))
+  # pl$models <- pl$models %>%
+  #   dplyr::mutate(fit = purrr::invoke_map(.$.f, .$params, data = pl$data))
+  #
+  fit_cvdata <- function(train_data, cv_id, models) {
+    models %>%
+      dplyr::mutate(fit = purrr::invoke_map(.$.f, .$params, data = train_data),
+                    cv.id = cv_id)
+  }
+
+  pl$fits <- purrr::map2_df(pl$cv_pairs$train, pl$cv_pairs$.id, fit_cvdata, models = pl$models)
 
   pl
 }
