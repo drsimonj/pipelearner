@@ -5,7 +5,17 @@
 #'
 #' @inheritParams pipelearner_params
 #' @export
-fit_learners <- function(pl) {
+fit <- function(pl) {
+  UseMethod("fit")
+}
+
+#' @export
+fit.default <- function(pl) {
+  stop("fit() should only be used with a pipelearner object")
+}
+
+#' @export
+fit.pipelearner <- function(pl) {
 
   if (is.null(pl$models))
     stop("There are no models to fit. Add models first with `learn_models`")
