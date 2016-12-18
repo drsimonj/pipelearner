@@ -1,24 +1,24 @@
-#' Fit mahine learning models
+#' Learn from data
 #'
-#' \code{pipelearner_fit} takes a pipelearner object and conducts the steps
-#' needed to fit all of the specified models.
+#' \code{learn} takes a pipelearner object and conducts the steps needed to
+#' learn/fit all of the specified models on data.
 #'
 #' @inheritParams pipelearner_params
 #' @export
-fit <- function(pl) {
-  UseMethod("fit")
+learn <- function(pl) {
+  UseMethod("learn")
 }
 
 #' @export
-fit.default <- function(pl) {
-  stop("fit() should only be used with a pipelearner object")
+learn.default <- function(pl) {
+  stop("learn() should only be used with a pipelearner object")
 }
 
 #' @export
-fit.pipelearner <- function(pl) {
+learn.pipelearner <- function(pl) {
 
   if (is.null(pl$models))
-    stop("There are no models to fit. Add models first with `learn_models`")
+    stop("There are no models to learn with. Add models first with `learn_models`")
 
   pl$fits <- purrr::map_df(pl$train_ps, fit_p, pl$cv_pairs, pl$models)
 
