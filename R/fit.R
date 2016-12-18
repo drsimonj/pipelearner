@@ -10,18 +10,23 @@ fit_learners <- function(pl) {
   if (is.null(pl$models))
     stop("There are no models to fit. Add models first with `learn_models`")
 
-  # THIS IS A TEMPORARY TRIAL
-  # TODO: fit to all cross validation pairs and training rates
-  # pl$models <- pl$models %>%
-  #   dplyr::mutate(fit = purrr::invoke_map(.$.f, .$params, data = pl$data))
-  #
-  fit_cvdata <- function(train_data, cv_id, models) {
-    models %>%
-      dplyr::mutate(fit = purrr::invoke_map(.$.f, .$params, data = train_data),
-                    cv.id = cv_id)
-  }
 
-  pl$fits <- purrr::map2_df(pl$cv_pairs$train, pl$cv_pairs$.id, fit_cvdata, models = pl$models)
+  pl$fits <- purrr::map_df(pl$train_ps, fit_p, pl$cv_pairs, pl$models)
+
+  #pl$fits <- purrr::map2_df(pl$cv_pairs$train, pl$cv_pairs$.id, fit_cvdata, models = pl$models)
 
   pl
+}
+
+
+fit_cvdata <- function(train_data, cv_id, models) {
+  models %>%
+    dplyr::mutate(fit = purrr::invoke_map(.$.f, .$params, data = train_data),
+                  cv.id = cv_id)
+}
+
+fit_p <- function(p, cv_tbl, models) {
+  data_list <- purrr::map(cv_tbl$train, ~ as.data.frame(.) %>% dplyr::sample_frac(p))
+  purrr::map2_df(data_list, cv_tbl$.id, fit_cvdata, models = models) %>%
+    dplyr::mutate(train.p = p)
 }
