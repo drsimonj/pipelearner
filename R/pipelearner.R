@@ -13,11 +13,15 @@ pipelearner <- function(data, model = NULL, formulas = NULL, ...) {
 
 #' @export
 pipelearner.default <- function(data, model = NULL, formulas = NULL, ...) {
-  pipelearner.data.frame(as.data.frame(data), model = model, formulas = formulas, ...)
+  pipelearner.data.frame(data, model = model, formulas = formulas, ...)
 }
 
 #' @export
 pipelearner.data.frame <- function(data, models = NULL, formulas = NULL, ...) {
+
+  if (missing(data)) stop("pipelearner() requires a data frame for the 'data' argument")
+
+  data <- tibble::as_tibble(data)
 
   pl <- structure(list(
     data     = data,
