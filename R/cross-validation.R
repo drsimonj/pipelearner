@@ -17,12 +17,12 @@ learn_cvpairs <- function(pl, k = NULL, n = 1, test = .02) {
 }
 
 #' @export
-learn_cvpairs.default <-  function(pl, k = NULL, n = 1, test = .02) {
+learn_cvpairs.default <-  function(pl, k = NULL, n = 1, test = 0.2) {
   learn_cvpairs.pipelearner(pipelearner(pl), k = k, n = n, test = test)
 }
 
 #' @export
-learn_cvpairs.pipelearner <- function(pl, k = NULL, n = 1, test = .02) {
+learn_cvpairs.pipelearner <- function(pl, k = NULL, n = 1, test = 0.2) {
 
   # n random partitions
   if (is.null(k)) {

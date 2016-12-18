@@ -29,6 +29,7 @@ fit.pipelearner <- function(pl) {
 fit_cvdata <- function(train_data, cv_id, models) {
   models %>%
     dplyr::mutate(fit = purrr::invoke_map(.$.f, .$params, data = train_data),
+                 #outcome_var = purrr::map_chr(.$params, ~ as.character(lazyeval::f_lhs(.$formula))),
                   cv.id = cv_id)
 }
 
