@@ -1,20 +1,19 @@
-#' Fit models in a pipe learner object
+#' Fit mahine learning models
 #'
 #' \code{pipelearner_fit} takes a pipelearner object and conducts the steps
 #' needed to fit all of the specified models.
 #'
-#' @param pl pipelearner object
+#' @inheritParams pipelearner_params
 #' @export
-pipelearner_fit <- function(pl) {
+fit_learners <- function(pl) {
 
-  # If required, coerce data frame to default .80 train and .20 test set
-  # if (length(pl$data) != 3 ||
-  #     all(names(pl$data) != c("train", "test", ".id")) ||
-  #     all(purrr::map_chr(pl$data, class) == c("list", "list", "character"))) {
-  #
-  #   pl$data <- modelr::crossv_mc(pl$data, 1, test = 0.2)
-  # }
+  if (is.null(pl$models))
+    stop("There are no models to fit. Add models first with `learn_models`")
+
+  # THIS IS A TEMPORARY TRIAL
+  # TODO: fit to all cross validation pairs and training rates
+  pl$models <- pl$models %>%
+    dplyr::mutate(fit = purrr::invoke_map(.$.f, .$params, data = pl$data))
 
   pl
-
 }
