@@ -7,27 +7,38 @@
 #' coerce it to a pipelearner object via \code{\link{pipelearner}}.
 #'
 #' @inheritParams pipelearner_params
-#' @param ... Function calls of the learning models to use
+#' @param model Function call to the learning model
+#' @param formulas List of objects of class "formula" (or one that can be
+#'   coerced to that class): a symbolic description of the model to be fitted.
+#' @param ... Additional arguments to be passed to the model function as
+#'   hyperparameters
 #' @export
-learn_models <- function(pl, ...) {
-  UseMethod("learn_models")
+learn_model <- function(pl, model, formulas, ...) {
+  UseMethod("learn_model")
 }
 
 #' @export
-learn_models.default <- function(pl, ...) {
-  learn_models.pipelearner(pipelearner(pl), ...)
+learn_model.default <- function(pl, model, formulas, ...) {
+  learn_model.pipelearner(pipelearner(pl), model = model, formulas = formulas, ...)
 }
 
 #' @export
-learn_models.pipelearner <- function(pl, ...) {
+learn_model.pipelearner <- function(pl, model, formulas, ...) {
 
-  mod_names <- lazyeval::lazy_dots(...) %>% purrr::map("expr") %>% as.character()
-  function_calls <- lazyeval::uqs(list(...))
+  mod_name <- lazyeval::expr_text(model)
+  # mod_func <- lazyeval::uqs(c(model))
 
-  models <- tibble::tibble(
-    model = mod_names,
-    .f    = function_calls
-  )
+  grid <- list(formula = formulas, ...) %>% purrr::cross_d()
+
+
+#
+#   mod_names <- lazyeval::lazy_dots(...) %>% purrr::map("expr") %>% as.character()
+#   function_calls <- lazyeval::uqs(list(...))
+#
+#   models <- tibble::tibble(
+#     model = mod_names,
+#     .f    = function_calls
+#   )
 
   # models <- tibble::tibble(
   #   model = deparse(...),
@@ -37,6 +48,6 @@ learn_models.pipelearner <- function(pl, ...) {
   # # Check at least one model provided
   # if (!nrow(models)) stop("Please provide at least one learning model function")
 
-  pl$models <- models
+  pl$models[[mod_name]] <- grid
   pl
 }
