@@ -18,7 +18,7 @@ learn_curves <- function(pl, ...) {
 
 #' @export
 learn_curves.default <-  function(pl, ...) {
-  learn_curves.pipelearner(pipelearner(pl), ...)
+  pipelearner(pl, ...)
 }
 
 #' @export

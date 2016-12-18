@@ -7,47 +7,38 @@
 #' coerce it to a pipelearner object via \code{\link{pipelearner}}.
 #'
 #' @inheritParams pipelearner_params
-#' @param model Learning model function
+#' @param models Vecor of learning model functions
 #' @param formulas Vector of objects of class "formula" (or one that can be
 #'   coerced to that class): a symbolic description of the model to be fitted.
 #' @param ... Additional named vectors to be passed to the model function as a
 #'   grid of hyperparameters
 #' @export
-learn_model <- function(pl, model, formulas, ...) {
-  UseMethod("learn_model")
+learn_models <- function(pl, models, formulas, ...) {
+  UseMethod("learn_models")
 }
 
 #' @export
-learn_model.default <- function(pl, model, formulas, ...) {
-  pipelearner(pl, model = model, formulas = formulas, ...)
+learn_models.default <- function(pl, models, formulas, ...) {
+  #model <- lazyeval::expr_text(model)
+  pipelearner(pl) %>% learn_models(models = models, formulas = formulas, ...)
 }
 
 #' @export
-learn_model.pipelearner <- function(pl, model, formulas, ...) {
+learn_models.pipelearner <- function(pl, models, formulas, ...) {
 
-  mod_name <- lazyeval::expr_text(model)
-  # mod_func <- lazyeval::uqs(c(model))
+  # Create complete parameter grid in single params column
+  params <- list(formula = formulas, ...) %>%
+            purrr::cross_d() %>%
+            dplyr::mutate(.id = row_number()) %>%
+            tidyr::nest(-.id, .key = params) %>%
+            dplyr::mutate(params = purrr::map(params, unlist))
 
-  grid <- list(formula = formulas, ...) %>% purrr::cross_d()
+  models <- list(.f = c(models), params = params$params) %>% purrr::cross_d()
 
+  # TODO: implement fitting function. Example...
+  # purrr::invoke_map(x$model, x$formula, data = mtcars)
 
-#
-#   mod_names <- lazyeval::lazy_dots(...) %>% purrr::map("expr") %>% as.character()
-#   function_calls <- lazyeval::uqs(list(...))
-#
-#   models <- tibble::tibble(
-#     model = mod_names,
-#     .f    = function_calls
-#   )
+  pl$models <- rbind(pl$models, models)
 
-  # models <- tibble::tibble(
-  #   model = deparse(...),
-  #   .f    = list(...)
-  # )
-  #
-  # # Check at least one model provided
-  # if (!nrow(models)) stop("Please provide at least one learning model function")
-
-  pl$models[[mod_name]] <- grid
   pl
 }
