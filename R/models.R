@@ -26,6 +26,12 @@ learn_models.default <- function(pl, models, formulas, ...) {
 #' @export
 learn_models.pipelearner <- function(pl, models, formulas, ...) {
 
+  if (missing(models) | missing(formulas))
+    stop("'models' and/or 'formulas' are missing, with no default")
+
+  if (!is.vector(formulas))
+    formulas <- c(formulas)
+
   # Create complete parameter grid in single params column
   params <- list(formula = formulas, ...) %>%
             purrr::cross_d() %>%
@@ -34,9 +40,6 @@ learn_models.pipelearner <- function(pl, models, formulas, ...) {
             dplyr::mutate(params = purrr::map(params, unlist))
 
   models <- list(.f = c(models), params = params$params) %>% purrr::cross_d()
-
-  # TODO: implement fitting function. Example...
-  # purrr::invoke_map(x$model, x$formula, data = mtcars)
 
   pl$models <- rbind(pl$models, models)
 
