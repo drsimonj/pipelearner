@@ -7,11 +7,11 @@
 #' coerce it to a pipelearner object via \code{\link{pipelearner}}.
 #'
 #' @inheritParams pipelearner_params
-#' @param model Function call to the learning model
-#' @param formulas List of objects of class "formula" (or one that can be
+#' @param model Learning model function
+#' @param formulas Vector of objects of class "formula" (or one that can be
 #'   coerced to that class): a symbolic description of the model to be fitted.
-#' @param ... Additional arguments to be passed to the model function as
-#'   hyperparameters
+#' @param ... Additional named vectors to be passed to the model function as a
+#'   grid of hyperparameters
 #' @export
 learn_model <- function(pl, model, formulas, ...) {
   UseMethod("learn_model")
@@ -19,7 +19,7 @@ learn_model <- function(pl, model, formulas, ...) {
 
 #' @export
 learn_model.default <- function(pl, model, formulas, ...) {
-  learn_model.pipelearner(pipelearner(pl), model = model, formulas = formulas, ...)
+  pipelearner(pl, model = model, formulas = formulas, ...)
 }
 
 #' @export

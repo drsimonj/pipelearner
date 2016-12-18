@@ -9,13 +9,13 @@ learn_model(pl, model, formulas, ...)
 \arguments{
 \item{pl}{pipelearner object. See \code{\link{pipelearner}}}
 
-\item{model}{Function call to the learning model}
+\item{model}{Learning model function}
 
-\item{formulas}{List of objects of class "formula" (or one that can be
+\item{formulas}{Vector of objects of class "formula" (or one that can be
 coerced to that class): a symbolic description of the model to be fitted.}
 
-\item{...}{Additional arguments to be passed to the model function as
-hyperparameters}
+\item{...}{Additional named vectors to be passed to the model function as a
+grid of hyperparameters}
 }
 \description{
 Add a learning model to a pipelearner object.

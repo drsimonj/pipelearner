@@ -4,11 +4,19 @@
 \alias{pipelearner}
 \title{Create a new pipe learner}
 \usage{
-pipelearner(data)
+pipelearner(data, model = NULL, formulas = NULL, ...)
 }
 \arguments{
 \item{data}{Data frame containing all variables needed by learning algorithm
 formulae.}
+
+\item{model}{Learning model function}
+
+\item{formulas}{Vector of objects of class "formula" (or one that can be
+coerced to that class): a symbolic description of the model to be fitted.}
+
+\item{...}{Additional named vectors to be passed to the model function as a
+grid of hyperparameters}
 }
 \description{
 \code{pipelearner} initializes a new pipelearner object. It is used to

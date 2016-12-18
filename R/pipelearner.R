@@ -5,18 +5,20 @@
 #'
 #' @param data Data frame containing all variables needed by learning algorithm
 #'   formulae.
+#' @inheritParams learn_model
 #' @export
-pipelearner <- function(data) {
+pipelearner <- function(data, model = NULL, formulas = NULL, ...) {
   UseMethod("pipelearner")
 }
 
 #' @export
-pipelearner.default <- function(data) {
-  pipelearner.data.frame(as.data.frame(data))
+pipelearner.default <- function(data, model = NULL, formulas = NULL, ...) {
+  pipelearner.data.frame(as.data.frame(data), model = model, formulas = formulas, ...)
 }
 
 #' @export
-pipelearner.data.frame <- function(data) {
+pipelearner.data.frame <- function(data, model = NULL, formulas = NULL, ...) {
+
   pl <- structure(list(
     data     = data,
     cv_pairs = NULL,
@@ -27,6 +29,9 @@ pipelearner.data.frame <- function(data) {
   # Set defaults
   pl <- learn_cvpairs(pl)   # cross-validation pairs
   pl <- learn_curves(pl)    # learning curves
+
+  if (!is.null(model))
+    pl <- learn_model(pl, model = model, formulas = formulas, ...)
 
   pl
 }
