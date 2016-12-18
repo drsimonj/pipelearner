@@ -18,9 +18,10 @@ pipelearner.default <- function(data) {
 #' @export
 pipelearner.data.frame <- function(data) {
   pl <- structure(list(
-    data = data,
+    data     = data,
     cv_pairs = NULL,
-    train_ps = NULL
+    train_ps = NULL,
+    models   = NULL
   ), class = c("pipelearner"))
 
   # Set defaults

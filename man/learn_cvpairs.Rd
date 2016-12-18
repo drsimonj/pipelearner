@@ -23,9 +23,8 @@ k folds will be created. See \code{\link[modelr]{crossv_mc}} for more
 details.
 }
 \details{
-\code{learn_cvpairs} will expect a pipelearner object, but will also accept a
-data frame for the parameter \code{pl}. In the case that a data frame is
-used, it will first coerce it to a pipelearner object via
-\code{\link{pipelearner}}.
+Will expect a pipelearner object, but will also accept a data frame for the
+parameter \code{pl}. In the case that a data frame is used, it will first
+coerce it to a pipelearner object via \code{\link{pipelearner}}.
 }
 
