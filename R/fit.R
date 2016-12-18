@@ -10,10 +10,7 @@ fit_learners <- function(pl) {
   if (is.null(pl$models))
     stop("There are no models to fit. Add models first with `learn_models`")
 
-
   pl$fits <- purrr::map_df(pl$train_ps, fit_p, pl$cv_pairs, pl$models)
-
-  #pl$fits <- purrr::map2_df(pl$cv_pairs$train, pl$cv_pairs$.id, fit_cvdata, models = pl$models)
 
   pl
 }
