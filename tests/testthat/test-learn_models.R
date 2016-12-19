@@ -30,13 +30,14 @@ test_that("requires model and formula", {
   pl <- pipelearner(df)
 
   expect_error(learn_models(pl),
-               "'models' and/or 'formulas' are missing, with no default")
-
-  expect_error(learn_models(pl, models = lm),
-               "'models' and/or 'formulas' are missing, with no default")
+               "'models' is missing with no default")
 
   expect_error(learn_models(pl, formulas = mpg ~ hp),
-               "'models' and/or 'formulas' are missing, with no default")
+               "'models' is missing with no default")
+
+  expect_error(learn_models(pl, models = lm),
+               "'formulas' is missing with no default")
+
 })
 
 test_that("Coerces pipelearner", {

@@ -19,7 +19,7 @@ pipelearner.default <- function(data, model = NULL, formulas = NULL, ...) {
 #' @export
 pipelearner.data.frame <- function(data, models = NULL, formulas = NULL, ...) {
 
-  if (missing(data)) stop("pipelearner() requires a data frame for the 'data' argument")
+  if (missing(data)) stop("'data' is missing with no default")
 
   data <- tibble::as_tibble(data)
 

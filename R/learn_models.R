@@ -26,11 +26,11 @@ learn_models.default <- function(pl, models, formulas, ...) {
 #' @export
 learn_models.pipelearner <- function(pl, models, formulas, ...) {
 
-  if (missing(models) | missing(formulas))
-    stop("'models' and/or 'formulas' are missing, with no default")
+  if (missing(models)) stop("'models' is missing with no default")
+  if (missing(formulas)) stop("'formulas' is missing with no default")
 
-  if (!is.vector(formulas))
-    formulas <- c(formulas)
+  # formulas should be a vector
+  formulas <- c(formulas)
 
   # Create complete parameter grid in single params column
   params <- list(formula = formulas, ...) %>%
