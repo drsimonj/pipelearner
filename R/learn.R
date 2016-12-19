@@ -11,14 +11,14 @@ learn <- function(pl) {
 
 #' @export
 learn.default <- function(pl) {
-  stop("learn() should only be used with a pipelearner object")
+  stop("`learn` should only be used with a pipelearner object")
 }
 
 #' @export
 learn.pipelearner <- function(pl) {
 
   if (is.null(pl$models))
-    stop("There are no models to learn with. Add models first with `learn_models`")
+    stop("No models to learn with. Add using `learn_models`")
 
   pl$fits <- purrr::map_df(pl$train_ps, fit_p, pl$cv_pairs, pl$models)
 
