@@ -29,8 +29,8 @@ test_that("default setup", {
 })
 
 test_that("model setup", {
-  pl <- pipelearner(df, models = c(lm, glm), formulas = c(mpg ~ hp, am ~ wt))
-
-  expect_equal(nrow(pl$models), 4)
-  expect_equal(names(pl$models), c(".f", "params"))
+  expect_identical(
+    pipelearner(df, models = c(lm, glm), formulas = c(mpg ~ hp, am ~ wt))$models,
+    learn_models(pipelearner(df), c(lm, glm), c(mpg ~ hp, am ~ wt))$models
+  )
 })

@@ -7,7 +7,7 @@ test_that("single call", {
   pl2 <- pipelearner(df) %>% learn_models(lm, c(mpg~hp, hp~am))
   pl8 <- pipelearner(df) %>% learn_models(c(lm, glm), c(mpg~hp, hp~am), method = c("a", "b"))
 
-  expect_equal(names(pl1$models), c(".f", "params"))
+  expect_equal(names(pl1$models), c(".f", "params", ".id"))
   expect_equal(nrow(pl1$models), 1)
   expect_equal(nrow(pl2$models), 2)
   expect_equal(nrow(pl8$models), 8)

@@ -39,9 +39,12 @@ learn_models.pipelearner <- function(pl, models, formulas, ...) {
             tidyr::nest(-.id, .key = params) %>%
             dplyr::mutate(params = purrr::map(params, unlist))
 
-  models <- list(.f = c(models), params = params$params) %>% purrr::cross_d()
+  models <- list(.f = c(models), params = params$params) %>%
+    purrr::cross_d() %>%
+    dplyr::mutate(.id = NA)
 
-  pl$models <- rbind(pl$models, models)
+  pl$models <- rbind(pl$models, models) %>%
+    dplyr::mutate(.id = seq(nrow(.)))
 
   pl
 }
