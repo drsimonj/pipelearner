@@ -40,6 +40,21 @@ test_that("requires model and formula", {
 
 })
 
+test_that("requires function with formula and data args", {
+  pl <- pipelearner(df)
+  x <- 2
+
+  expect_error(learn_models(pl, x, c(mpg ~ hp)),
+               "`x` is not a function")
+
+  expect_error(learn_models(pl, 100, c(mpg ~ hp)),
+               "`100` is not a function")
+
+  expect_error(learn_models(pl, print, c(mpg ~ hp)),
+               "`print` does not have arguments 'formula' and 'data'")
+
+})
+
 test_that("Coerces pipelearner", {
   lmod <- learn_models(df, lm, mpg ~ hp)
   pl <- pipelearner(df) %>% learn_models(lm, mpg ~ hp)

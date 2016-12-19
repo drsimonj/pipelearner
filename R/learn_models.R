@@ -34,8 +34,18 @@ learn_models.pipelearner <- function(pl, models, formulas, ...) {
   if (missing(models)) stop("'models' is missing with no default")
   if (missing(formulas)) stop("'formulas' is missing with no default")
 
-  # formulas should be vector
+  # models and formulas should be vectors
+  models   <- c(models)
   formulas <- c(formulas)
+
+  # Check all models are functions that provide formula and data arguments
+  for (m in seq(models)) {
+    if (!is.function(models[[m]]))
+      stop("`", model_names[m], "` is not a function")
+
+    if (!all(c("formula", "data") %in% names(formals(models[[m]]))))
+      stop("`", model_names[m], "` does not have arguments 'formula' and 'data'")
+  }
 
   # Create complete parameter grid in single params column
   params <- list(formula = formulas, ...) %>%
