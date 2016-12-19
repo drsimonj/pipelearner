@@ -26,10 +26,15 @@ learn_models.default <- function(pl, models, formulas, ...) {
 #' @export
 learn_models.pipelearner <- function(pl, models, formulas, ...) {
 
+  # Get model names (needs to happen first)
+  model_names <- lazyeval::expr_find(models) %>% as.character()
+  if (length(model_names) > 1) model_names <- model_names[-1]
+
+  # Argument checks
   if (missing(models)) stop("'models' is missing with no default")
   if (missing(formulas)) stop("'formulas' is missing with no default")
 
-  # formulas should be a vector
+  # formulas should be vector
   formulas <- c(formulas)
 
   # Create complete parameter grid in single params column
@@ -42,6 +47,11 @@ learn_models.pipelearner <- function(pl, models, formulas, ...) {
   models <- list(.f = c(models), params = params$params) %>%
     purrr::cross_d() %>%
     dplyr::mutate(.id = NA)
+  models$model <- model_names  # Recycled
+
+  # Order columns
+  models <- models %>%
+    dplyr::select(model, .f, params, .id)
 
   pl$models <- rbind(pl$models, models) %>%
     dplyr::mutate(.id = seq(nrow(.)))

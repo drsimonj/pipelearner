@@ -7,13 +7,13 @@
 #'   formulae.
 #' @inheritParams learn_models
 #' @export
-pipelearner <- function(data, model = NULL, formulas = NULL, ...) {
+pipelearner <- function(data, models = NULL, formulas = NULL, ...) {
   UseMethod("pipelearner")
 }
 
 #' @export
-pipelearner.default <- function(data, model = NULL, formulas = NULL, ...) {
-  pipelearner.data.frame(data, model = model, formulas = formulas, ...)
+pipelearner.default <- function(data, models = NULL, formulas = NULL, ...) {
+  pipelearner.data.frame(data, models = models, formulas = formulas, ...)
 }
 
 #' @export
