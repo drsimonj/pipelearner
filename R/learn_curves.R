@@ -8,8 +8,7 @@
 #' coerce it to a pipelearner object via \code{\link{pipelearner}}.
 #'
 #' @inheritParams pipelearner_params
-#' @param ... Numbers that are greater than zero and less than or equal to one
-#'   representing the proportions of training data to learn on. Will default to
+#' @param ... Non-zero proportions of training data to learn on. Will default to
 #'   1 if no values are provided.
 #' @export
 learn_curves <- function(pl, ...) {
@@ -32,7 +31,7 @@ learn_curves.pipelearner <- function(pl, ...) {
   ps <- ps[order(ps)]
 
   if (!is.numeric(ps) || !all(ps > 0 & ps <= 1))
-    stop("ps must be a vector of numbers greater than 0 and less than or equal to 1")
+    stop("Only non-zero proprtions are allowed")
 
   pl$train_ps <- ps
   pl

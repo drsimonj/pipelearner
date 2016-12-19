@@ -9,8 +9,7 @@ learn_curves(pl, ...)
 \arguments{
 \item{pl}{pipelearner object. See \code{\link{pipelearner}}}
 
-\item{...}{Numbers that are greater than zero and less than or equal to one
-representing the proportions of training data to learn on. Will default to
+\item{...}{Non-zero proportions of training data to learn on. Will default to
 1 if no values are provided.}
 }
 \description{

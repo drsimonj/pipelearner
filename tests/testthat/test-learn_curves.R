@@ -11,19 +11,19 @@ test_that("default setup", {
 
 test_that("Errors when ! 0 < x <= 1", {
   expect_error(pipelearner(df) %>% learn_curves(0),
-               "ps must be a vector of numbers greater than 0 and less than or equal to 1")
+               "Only non-zero proprtions are allowed")
 
   expect_error(pipelearner(df) %>% learn_curves(1.1),
-               "ps must be a vector of numbers greater than 0 and less than or equal to 1")
+               "Only non-zero proprtions are allowed")
 
   expect_error(pipelearner(df) %>% learn_curves(-1),
-               "ps must be a vector of numbers greater than 0 and less than or equal to 1")
+               "Only non-zero proprtions are allowed")
 
   expect_error(pipelearner(df) %>% learn_curves("a"),
-               "ps must be a vector of numbers greater than 0 and less than or equal to 1")
+               "Only non-zero proprtions are allowed")
 
   expect_error(pipelearner(df) %>% learn_curves(TRUE),
-               "ps must be a vector of numbers greater than 0 and less than or equal to 1")
+               "Only non-zero proprtions are allowed")
 })
 
 test_that("Creates ordered vector", {
