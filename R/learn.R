@@ -27,19 +27,24 @@ learn.pipelearner <- function(pl) {
 
 
 fit_cvdata <- function(train_data, test_data, cv_id, models) {
-  models %>%
-    dplyr::mutate(fit = purrr::invoke_map(.$.f, .$params, data = train_data),
-                  predicted_train = purrr::map(fit, predict, newdata = train_data),
-                  predicted_test  = purrr::map(fit, predict, newdata = test_data),
-                 #outcome_var = purrr::map_chr(.$params, ~ as.character(lazyeval::f_lhs(.$formula))),
-                  cv_pair = cv_id)
+  tibble::tibble(
+    cv_pair = cv_id,
+    model   = models$.id,
+    fit = purrr::invoke_map(models$.f, models$params, data = train_data),
+    predicted_train = purrr::map(fit, predict, newdata = train_data),
+    predicted_test  = purrr::map(fit, predict, newdata = test_data)
+  )
 }
 
 fit_p <- function(p, cv_tbl, models) {
   data_list <- purrr::map(cv_tbl$train, ~ as.data.frame(.) %>% dplyr::sample_frac(p))
-  #purrr::map2_df(data_list, cv_tbl$.id, fit_cvdata, models = models) %>%
   to_fit <- list(train_data = data_list, test_data = cv_tbl$test, cv_id = cv_tbl$.id)
-  purrr::pmap_df(to_fit, fit_cvdata, models = models) %>%
-    dplyr::mutate(train_p = p)
+  tmp <- purrr::pmap_df(to_fit, fit_cvdata, models = models) %>%
+          dplyr::mutate(train_p = p)
+
+  # Order columns and arrange rows
+  tmp %>%
+    dplyr::select(model, cv_pair, train_p, dplyr::everything()) %>%
+    dplyr::arrange(model, cv_pair, train_p)
 
 }
