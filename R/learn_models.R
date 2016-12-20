@@ -65,7 +65,7 @@ learn_models.pipelearner <- function(pl, models, formulas, ...) {
     dplyr::select(target, model, params, .f, dplyr::everything(), .id)
 
   pl$models <- rbind(pl$models, models) %>%
-    dplyr::mutate(.id = seq(nrow(.)))
+    dplyr::mutate(.id = nrow(.) %>% seq_len() %>% as.character())
 
   pl
 }
