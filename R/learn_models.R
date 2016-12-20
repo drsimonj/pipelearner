@@ -56,15 +56,22 @@ learn_models.pipelearner <- function(pl, models, formulas, ...) {
 
   models <- list(.f = c(models), params = params$params) %>%
     purrr::cross_d() %>%
-    dplyr::mutate(.id = NA)
+    dplyr::mutate(.id = NA,
+                  target = purrr::map_chr(params, ~ lhs_as_chr(.$formula)))
   models$model <- model_names  # Recycled
 
   # Order columns
   models <- models %>%
-    dplyr::select(model, .f, params, .id)
+    dplyr::select(target, model, params, .f, dplyr::everything(), .id)
 
   pl$models <- rbind(pl$models, models) %>%
     dplyr::mutate(.id = seq(nrow(.)))
 
   pl
+}
+
+lhs_as_chr <- function(formula) {
+  formula %>%
+    lazyeval::f_lhs() %>%
+    as.character()
 }
