@@ -31,14 +31,17 @@ fit_cvdata <- function(train_data, cv_id, models) {
   tibble::tibble(
     cv_pair = cv_id,
     model   = models$.id,
-    fit     = purrr::invoke_map(models$.f, models$params, data = train_data)
+    fit     = purrr::invoke_map(models$.f, models$params, data = train_data),
+    true_train_target = purrr::map(models$target, ~ train_data[[.]])
   )
 }
 
 fit_p <- function(p, cv_tbl, models) {
   # Fit models
   data_list <- purrr::map(cv_tbl$train, ~ as.data.frame(.) %>% dplyr::sample_frac(p))
+
   to_fit <- list(train_data = data_list, cv_id = cv_tbl$.id)
+
   tmp <- purrr::pmap_df(to_fit, fit_cvdata, models = models) %>%
           dplyr::mutate(train_p = p)
 
