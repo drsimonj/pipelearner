@@ -32,7 +32,8 @@ fit_cvdata <- function(train_data, cv_id, models) {
     cv_pair = cv_id,
     model   = models$.id,
     fit     = purrr::invoke_map(models$.f, models$params, data = train_data),
-    true_train_target = purrr::map(models$target, ~ train_data[[.]])
+    true_train_target = purrr::map(models$target, ~ train_data[[.]]),
+    predicted_train_target = purrr::map(fit, predict, train_data)
   )
 }
 
@@ -44,7 +45,6 @@ fit_p <- function(p, cv_tbl, models) {
 
   tmp <- purrr::pmap_df(to_fit, fit_cvdata, models = models) %>%
           dplyr::mutate(train_p = p)
-
 
   #test_data = cv_tbl$test,
 
