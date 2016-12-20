@@ -7,6 +7,14 @@
 #' parameter \code{pl}. In the case that a data frame is used, it will first
 #' coerce it to a pipelearner object via \code{\link{pipelearner}}.
 #'
+#' When these proportions are applied to cross-validation training sets, they
+#' will always slice the proportion starting the beginning. For example, a
+#' proportion of .5 will take the first 50\% of rows from the training data
+#' (rounded to the nearest whole number). There is no point taking random
+#' subsamples of size p from the training data because it would require us to
+#' save these subsamples (taking up more space) despite the fact that the
+#' training data is already a random sample (see \code{\link{learn_cvpairs}}).
+#'
 #' @inheritParams pipelearner_params
 #' @param ... Non-zero proportions of training data to learn on. Will default to
 #'   1 if no values are provided.

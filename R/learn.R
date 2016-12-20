@@ -32,14 +32,14 @@ fit_cvdata <- function(train_data, cv_id, models) {
     cv_pair = cv_id,
     model   = models$.id,
     fit     = purrr::invoke_map(models$.f, models$params, data = train_data),
-    true_train_target = purrr::map(models$target, ~ train_data[[.]]),
-    predicted_train_target = purrr::map(fit, predict, train_data)
+    true_train_target = purrr::map(models$target, ~ as.data.frame(train_data)[[.]]),
+    predicted_train_target = purrr::map(fit, predict, as.data.frame(train_data))
   )
 }
 
 fit_p <- function(p, cv_tbl, models) {
   # Fit models
-  data_list <- purrr::map(cv_tbl$train, ~ as.data.frame(.) %>% dplyr::sample_frac(p))
+  data_list <- purrr::map(cv_tbl$train, p_from_resample, p)
 
   to_fit <- list(train_data = data_list, cv_id = cv_tbl$.id)
 
@@ -53,4 +53,11 @@ fit_p <- function(p, cv_tbl, models) {
     dplyr::select(model, cv_pair, train_p, dplyr::everything()) %>%
     dplyr::arrange(model, cv_pair, train_p)
 
+}
+
+# Take a rounded proportion of data from the beginning of a resample object
+p_from_resample <- function(resample, p) {
+  n = round(nrow(resample) * p)  # Rounded
+  resample$idx <- resample$idx[seq_len(n)]
+  resample
 }
