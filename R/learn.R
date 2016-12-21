@@ -26,7 +26,7 @@ learn.pipelearner <- function(pl) {
     dplyr::select(models.id, cv_pairs.id, train_p, dplyr::everything()) %>%
     dplyr::arrange(models.id, cv_pairs.id, train_p) %>%
     # Add .id
-    dplyr::mutate(.id = seq_len(nrow(.)))
+    dplyr::mutate(.id = as.character(seq_len(nrow(.))))
 
   pl
 }
