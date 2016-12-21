@@ -21,12 +21,7 @@ learn.pipelearner <- function(pl) {
     stop("No models to learn with. Add using `learn_models`")
 
   # Fit models
-  pl$fits <- purrr::map_df(pl$train_ps, fit_p, pl$cv_pairs, pl$models) %>%
-    # Convert integer .id references to resample pointers
-    dplyr::mutate(
-      model = purrr::map(model, ~ modelr::resample(pl$models, as.integer(.))),
-      cv_pair = purrr::map(cv_pair, ~ modelr::resample(pl$cv_pairs, as.integer(.)))
-    )
+  pl$fits <- purrr::map_df(pl$train_ps, fit_p, pl$cv_pairs, pl$models)
 
   pl
 }
@@ -34,11 +29,9 @@ learn.pipelearner <- function(pl) {
 
 fit_cvdata <- function(train_data, cv_id, models) {
   tibble::tibble(
-    cv_pair = cv_id,
-    model   = models$.id,
-    fit     = purrr::invoke_map(models$.f, models$params, data = train_data)#,
-    #true_train_target = purrr::map(models$target, ~ as.data.frame(train_data)[[.]]),
-    #predicted_train_target = purrr::map(fit, predict, as.data.frame(train_data))
+    cv_pairs.id = cv_id,
+    models.id   = models$.id,
+    fit         = purrr::invoke_map(models$.f, models$params, data = train_data)
   )
 }
 
@@ -53,7 +46,7 @@ fit_p <- function(p, cv_tbl, models) {
 
   # Order columns and arrange rows
   tmp %>%
-    dplyr::select(model, cv_pair, train_p, dplyr::everything()) %>%
-    dplyr::arrange(model, cv_pair, train_p)
+    dplyr::select(models.id, cv_pairs.id, train_p, dplyr::everything()) %>%
+    dplyr::arrange(models.id, cv_pairs.id, train_p)
 
 }
