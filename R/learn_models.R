@@ -7,7 +7,8 @@
 #' coerce it to a pipelearner object via \code{\link{pipelearner}}.
 #'
 #' @inheritParams pipelearner_params
-#' @param models Vecor of learning model functions
+#' @param models Vector of learning model functions which take data and formula
+#'   arguments
 #' @param formulas Vector of objects of class "formula" (or one that can be
 #'   coerced to that class): a symbolic description of the model to be fitted.
 #' @param ... Additional named vectors to be passed to the model function as a
@@ -38,13 +39,15 @@ learn_models.pipelearner <- function(pl, models, formulas, ...) {
   models   <- c(models)
   formulas <- c(formulas)
 
-  # Check all models are functions that provide formula and data arguments
+  # Check all models are functions
   for (m in seq(models)) {
     if (!is.function(models[[m]]))
       stop("`", model_names[m], "` is not a function")
 
-    if (!all(c("formula", "data") %in% names(formals(models[[m]]))))
-      stop("`", model_names[m], "` does not have arguments 'formula' and 'data'")
+    # -- This checks if function provides formula and data arguments
+    # -- However, it doesn't always work. E.g., randomForest::randomForest
+    #if (!all(c("formula", "data") %in% names(formals(models[[m]]))))
+    #  stop("`", model_names[m], "` does not have arguments 'formula' and 'data'")
   }
 
   # Create complete parameter grid in single params column

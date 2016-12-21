@@ -10,7 +10,8 @@ pipelearner(data, models = NULL, formulas = NULL, ...)
 \item{data}{Data frame containing all variables needed by learning algorithm
 formulae.}
 
-\item{models}{Vecor of learning model functions}
+\item{models}{Vector of learning model functions which take data and formula
+arguments}
 
 \item{formulas}{Vector of objects of class "formula" (or one that can be
 coerced to that class): a symbolic description of the model to be fitted.}

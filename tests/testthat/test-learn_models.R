@@ -39,7 +39,7 @@ test_that("requires model and formula", {
 
 })
 
-test_that("requires function with formula and data args", {
+test_that("requires function", {
   pl <- pipelearner(df)
   x <- 2
 
@@ -49,8 +49,8 @@ test_that("requires function with formula and data args", {
   expect_error(learn_models(pl, 100, c(mpg ~ hp)),
                "`100` is not a function")
 
-  expect_error(learn_models(pl, print, c(mpg ~ hp)),
-               "`print` does not have arguments 'formula' and 'data'")
+  #expect_error(learn_models(pl, print, c(mpg ~ hp)),
+  #             "`print` does not have arguments 'formula' and 'data'")
 
 })
 
