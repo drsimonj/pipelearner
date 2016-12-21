@@ -21,7 +21,12 @@ learn.pipelearner <- function(pl) {
     stop("No models to learn with. Add using `learn_models`")
 
   # Fit models
-  pl$fits <- purrr::map_df(pl$train_ps, fit_p, pl$cv_pairs, pl$models)
+  pl$fits <- purrr::map_df(pl$train_ps, fit_p, pl$cv_pairs, pl$models) %>%
+    # Arrange columns and rows
+    dplyr::select(models.id, cv_pairs.id, train_p, dplyr::everything()) %>%
+    dplyr::arrange(models.id, cv_pairs.id, train_p) %>%
+    # Add .id
+    dplyr::mutate(.id = seq_len(nrow(.)))
 
   pl
 }
@@ -41,16 +46,10 @@ fit_p <- function(p, cv_tbl, models) {
 
   to_fit <- list(train_data = data_list, cv_id = cv_tbl$.id)
 
-  tmp <- purrr::pmap_df(to_fit, fit_cvdata, models = models) %>%
-          dplyr::mutate(train_p = p)
-
-  # Order columns and arrange rows
-  tmp %>%
-    dplyr::select(models.id, cv_pairs.id, train_p, dplyr::everything()) %>%
-    dplyr::arrange(models.id, cv_pairs.id, train_p)
+  purrr::pmap_df(to_fit, fit_cvdata, models = models) %>%
+    dplyr::mutate(train_p = p)
 
 }
-
 
 #' Recover model and cross-validation information for fits
 #'
@@ -82,5 +81,7 @@ recover_fits.pipelearner <- function(pl) {
     ) %>%
     tidyr::unnest(models.row, cv_pairs.row) %>%
     # Recover training data
-    dplyr::mutate(train = purrr::map2(train, train_p, p_from_resample))
+    dplyr::mutate(train = purrr::map2(train, train_p, p_from_resample)) %>%
+    # Order columns
+    dplyr::select(-.id, dplyr::everything(), .id)
 }

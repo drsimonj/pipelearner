@@ -28,7 +28,8 @@ pipelearner.data.frame <- function(data, models = NULL, formulas = NULL, ...) {
     cv_pairs = NULL,
     train_ps = NULL,
     models   = NULL,
-    fits     = NULL
+    fits     = NULL,
+    results  = NULL
   ), class = c("pipelearner"))
 
   # Set defaults
