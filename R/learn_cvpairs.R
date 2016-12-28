@@ -12,7 +12,7 @@
 #' @inheritParams pipelearner_params
 #' @inheritParams modelr::crossv_mc
 #' @export
-learn_cvpairs <- function(pl, k = NULL, n = 1, test = .02) {
+learn_cvpairs <- function(pl, k = NULL, n = 1, test = 0.2) {
   UseMethod("learn_cvpairs")
 }
 

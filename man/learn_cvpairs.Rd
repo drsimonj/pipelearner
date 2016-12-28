@@ -4,7 +4,7 @@
 \alias{learn_cvpairs}
 \title{Cross-validation pairs}
 \usage{
-learn_cvpairs(pl, k = NULL, n = 1, test = 0.02)
+learn_cvpairs(pl, k = NULL, n = 1, test = 0.2)
 }
 \arguments{
 \item{pl}{pipelearner object. See \code{\link{pipelearner}}}
