@@ -10,7 +10,9 @@ learn(pl)
 \item{pl}{pipelearner object. See \code{\link{pipelearner}}}
 }
 \description{
-\code{learn} takes a pipelearner object and conducts the steps needed to
-learn/fit all of the specified models on data.
+\code{learn} conducts the steps needed to learn/fit all of the specified
+models on all cross-validation training data sets, in all variations of
+training sample size, in a pipelearner object, and return the results as a
+summarized tibble.
 }
 
