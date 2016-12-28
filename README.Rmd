@@ -65,10 +65,10 @@ pl
 - `data` is split into a single cross-validation pair of resample objects (under `cv_pairs`) referencing 80% of the data for training and 20% for testing.
 - Learning is done on the entire proportion of the training data (`train_ps == 1`).
 
-When we've setup these elements as desired, use `learn()` to fit all models to every combination of training proportions (`train_ps`) and set of training data in the cross-validation pairs (`cv_pairs`). Use `summary()` to obtain a tibble of the results. 
+When we've setup these elements as desired, use `learn()` to fit all models to every combination of training proportions (`train_ps`) and set of training data in the cross-validation pairs (`cv_pairs`), and return a tibble of the results.
 
 ```{r}
-pl %>% learn() %>% summary()
+pl %>% learn()
 ```
 
 Quick notes:
@@ -84,8 +84,7 @@ Cross-validation pairs can be customized with `learn_cvpairs`. The following imp
 ```{r}
 pl %>%
   learn_cvpairs(k = 5) %>% 
-  learn() %>% 
-  summary()
+  learn()
 ```
 
 Notice the five rows where the model has been fitted to training data for each fold, represented by `cv_pairs.id`.
@@ -97,8 +96,7 @@ Learning curves can be customized wth `learn_curves`. The following will fit the
 ```{r}
 pl %>% 
   learn_curves(.5, .75, 1) %>% 
-  learn() %>% 
-  summary()
+  learn()
 ```
 
 Notice the three rows where the model has been fitted to the three proportions of the training data, represented by `train_p`.
@@ -110,8 +108,7 @@ We can add many models with `learn_models()`, which, unlike the previous functio
 ```{r}
 pl %>% 
   learn_models(rpart::rpart, Sepal.Length ~ .) %>% 
-  learn() %>% 
-  summary()
+  learn()
 ```
 
 Notice two rows where the regression and decision tree models have been fit to the training data, represented by `models.id`.
@@ -129,8 +126,7 @@ pipelearner(iris) %>%
                c(Sepal.Length ~ Sepal.Width,
                  Sepal.Length ~ Sepal.Width + Petal.Length,
                  Sepal.Length ~ Sepal.Width + Petal.Length + Species)) %>% 
-  learn() %>% 
-  summary()
+  learn()
 ```
 
 The following tests a regression model and grid-searches hyperparameters of a decision tree:
@@ -140,8 +136,7 @@ pipelearner(iris) %>%
   learn_models(lm, Sepal.Length ~ .) %>% 
   learn_models(rpart::rpart, Sepal.Length ~ .,
                minsplit = c(2, 20), cp = c(0.01, 0.1)) %>% 
-  learn() %>% 
-  summary()
+  learn()
 ```
 
 ## Brining it all together
@@ -159,8 +154,7 @@ iris %>%
   learn_curves(seq(.5, 1, by = .1)) %>% 
   learn_models(lm, Sepal.Width ~ .*.) %>% 
   learn_models(rpart::rpart, Sepal.Width ~ .) %>% 
-  learn() %>% 
-  summary()
+  learn()
 ```
 
 ## Extracting information from fits
@@ -198,8 +192,7 @@ results <- weather %>%
   learn_cvpairs(n = 50, test = .15) %>% 
   learn_curves(seq(.1, 1, by = .1)) %>% 
   learn_models(lm, visib ~ humid + precip + wind_dir) %>% 
-  learn() %>% 
-  summary()
+  learn()
 results
 ```
 

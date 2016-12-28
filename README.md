@@ -81,9 +81,6 @@ pl
 #>          <chr> <chr>     <list> <list> <chr>
 #> 1 Sepal.Length    lm <list [1]>  <fun>     1
 #> 
-#> $fits
-#> NULL
-#> 
 #> attr(,"class")
 #> [1] "pipelearner"
 ```
@@ -93,15 +90,15 @@ pl
 -   `data` is split into a single cross-validation pair of resample objects (under `cv_pairs`) referencing 80% of the data for training and 20% for testing.
 -   Learning is done on the entire proportion of the training data (`train_ps == 1`).
 
-When we've setup these elements as desired, use `learn()` to fit all models to every combination of training proportions (`train_ps`) and set of training data in the cross-validation pairs (`cv_pairs`). use `summary()` to obtain a tibble of the results.
+When we've setup these elements as desired, use `learn()` to fit all models to every combination of training proportions (`train_ps`) and set of training data in the cross-validation pairs (`cv_pairs`), and return a tibble of the results.
 
 ``` r
-pl %>% learn() %>% summary()
-#> # A tibble: 1 × 10
+pl %>% learn()
+#> # A tibble: 1 × 9
 #>   models.id cv_pairs.id train_p      fit       target model     params
 #>       <chr>       <chr>   <dbl>   <list>        <chr> <chr>     <list>
 #> 1         1           1       1 <S3: lm> Sepal.Length    lm <list [1]>
-#> # ... with 3 more variables: train <list>, test <list>, .id <chr>
+#> # ... with 2 more variables: train <list>, test <list>
 ```
 
 Quick notes:
@@ -118,9 +115,8 @@ Cross-validation pairs can be customized with `learn_cvpairs`. The following imp
 ``` r
 pl %>%
   learn_cvpairs(k = 5) %>% 
-  learn() %>% 
-  summary()
-#> # A tibble: 5 × 10
+  learn()
+#> # A tibble: 5 × 9
 #>   models.id cv_pairs.id train_p      fit       target model     params
 #>       <chr>       <chr>   <dbl>   <list>        <chr> <chr>     <list>
 #> 1         1           1       1 <S3: lm> Sepal.Length    lm <list [1]>
@@ -128,7 +124,7 @@ pl %>%
 #> 3         1           3       1 <S3: lm> Sepal.Length    lm <list [1]>
 #> 4         1           4       1 <S3: lm> Sepal.Length    lm <list [1]>
 #> 5         1           5       1 <S3: lm> Sepal.Length    lm <list [1]>
-#> # ... with 3 more variables: train <list>, test <list>, .id <chr>
+#> # ... with 2 more variables: train <list>, test <list>
 ```
 
 Notice the five rows where the model has been fitted to training data for each fold, represented by `cv_pairs.id`.
@@ -141,15 +137,14 @@ Learning curves can be customized wth `learn_curves`. The following will fit the
 ``` r
 pl %>% 
   learn_curves(.5, .75, 1) %>% 
-  learn() %>% 
-  summary()
-#> # A tibble: 3 × 10
+  learn()
+#> # A tibble: 3 × 9
 #>   models.id cv_pairs.id train_p      fit       target model     params
 #>       <chr>       <chr>   <dbl>   <list>        <chr> <chr>     <list>
 #> 1         1           1    0.50 <S3: lm> Sepal.Length    lm <list [1]>
 #> 2         1           1    0.75 <S3: lm> Sepal.Length    lm <list [1]>
 #> 3         1           1    1.00 <S3: lm> Sepal.Length    lm <list [1]>
-#> # ... with 3 more variables: train <list>, test <list>, .id <chr>
+#> # ... with 2 more variables: train <list>, test <list>
 ```
 
 Notice the three rows where the model has been fitted to the three proportions of the training data, represented by `train_p`.
@@ -162,15 +157,13 @@ We can add many models with `learn_models()`, which, unlike the previous functio
 ``` r
 pl %>% 
   learn_models(rpart::rpart, Sepal.Length ~ .) %>% 
-  learn() %>% 
-  summary()
-#> # A tibble: 2 × 10
+  learn()
+#> # A tibble: 2 × 9
 #>   models.id cv_pairs.id train_p         fit       target        model
 #>       <chr>       <chr>   <dbl>      <list>        <chr>        <chr>
 #> 1         1           1       1    <S3: lm> Sepal.Length           lm
 #> 2         2           1       1 <S3: rpart> Sepal.Length rpart::rpart
-#> # ... with 4 more variables: params <list>, train <list>, test <list>,
-#> #   .id <chr>
+#> # ... with 3 more variables: params <list>, train <list>, test <list>
 ```
 
 Notice two rows where the regression and decision tree models have been fit to the training data, represented by `models.id`.
@@ -187,9 +180,8 @@ pipelearner(iris) %>%
                c(Sepal.Length ~ Sepal.Width,
                  Sepal.Length ~ Sepal.Width + Petal.Length,
                  Sepal.Length ~ Sepal.Width + Petal.Length + Species)) %>% 
-  learn() %>% 
-  summary()
-#> # A tibble: 6 × 10
+  learn()
+#> # A tibble: 6 × 9
 #>   models.id cv_pairs.id train_p         fit       target
 #>       <chr>       <chr>   <dbl>      <list>        <chr>
 #> 1         1           1       1    <S3: lm> Sepal.Length
@@ -198,8 +190,8 @@ pipelearner(iris) %>%
 #> 4         4           1       1 <S3: rpart> Sepal.Length
 #> 5         5           1       1    <S3: lm> Sepal.Length
 #> 6         6           1       1 <S3: rpart> Sepal.Length
-#> # ... with 5 more variables: model <chr>, params <list>, train <list>,
-#> #   test <list>, .id <chr>
+#> # ... with 4 more variables: model <chr>, params <list>, train <list>,
+#> #   test <list>
 ```
 
 The following tests a regression model and grid-searches hyperparameters of a decision tree:
@@ -209,9 +201,8 @@ pipelearner(iris) %>%
   learn_models(lm, Sepal.Length ~ .) %>% 
   learn_models(rpart::rpart, Sepal.Length ~ .,
                minsplit = c(2, 20), cp = c(0.01, 0.1)) %>% 
-  learn() %>% 
-  summary()
-#> # A tibble: 5 × 10
+  learn()
+#> # A tibble: 5 × 9
 #>   models.id cv_pairs.id train_p         fit       target        model
 #>       <chr>       <chr>   <dbl>      <list>        <chr>        <chr>
 #> 1         1           1       1    <S3: lm> Sepal.Length           lm
@@ -219,8 +210,7 @@ pipelearner(iris) %>%
 #> 3         3           1       1 <S3: rpart> Sepal.Length rpart::rpart
 #> 4         4           1       1 <S3: rpart> Sepal.Length rpart::rpart
 #> 5         5           1       1 <S3: rpart> Sepal.Length rpart::rpart
-#> # ... with 4 more variables: params <list>, train <list>, test <list>,
-#> #   .id <chr>
+#> # ... with 3 more variables: params <list>, train <list>, test <list>
 ```
 
 Brining it all together
@@ -239,9 +229,8 @@ iris %>%
   learn_curves(seq(.5, 1, by = .1)) %>% 
   learn_models(lm, Sepal.Width ~ .*.) %>% 
   learn_models(rpart::rpart, Sepal.Width ~ .) %>% 
-  learn() %>% 
-  summary()
-#> # A tibble: 600 × 10
+  learn()
+#> # A tibble: 600 × 9
 #>    models.id cv_pairs.id train_p      fit      target model     params
 #>        <chr>       <chr>   <dbl>   <list>       <chr> <chr>     <list>
 #> 1          1          01     0.5 <S3: lm> Sepal.Width    lm <list [1]>
@@ -254,8 +243,7 @@ iris %>%
 #> 8          1          02     0.6 <S3: lm> Sepal.Width    lm <list [1]>
 #> 9          1          02     0.7 <S3: lm> Sepal.Width    lm <list [1]>
 #> 10         1          02     0.8 <S3: lm> Sepal.Width    lm <list [1]>
-#> # ... with 590 more rows, and 3 more variables: train <list>, test <list>,
-#> #   .id <chr>
+#> # ... with 590 more rows, and 2 more variables: train <list>, test <list>
 ```
 
 Extracting information from fits
@@ -294,10 +282,9 @@ results <- weather %>%
   learn_cvpairs(n = 50, test = .15) %>% 
   learn_curves(seq(.1, 1, by = .1)) %>% 
   learn_models(lm, visib ~ humid + precip + wind_dir) %>% 
-  learn() %>% 
-  summary()
+  learn()
 results
-#> # A tibble: 500 × 10
+#> # A tibble: 500 × 9
 #>    models.id cv_pairs.id train_p      fit target model     params
 #>        <chr>       <chr>   <dbl>   <list>  <chr> <chr>     <list>
 #> 1          1          01     0.1 <S3: lm>  visib    lm <list [1]>
@@ -310,8 +297,7 @@ results
 #> 8          1          01     0.8 <S3: lm>  visib    lm <list [1]>
 #> 9          1          01     0.9 <S3: lm>  visib    lm <list [1]>
 #> 10         1          01     1.0 <S3: lm>  visib    lm <list [1]>
-#> # ... with 490 more rows, and 3 more variables: train <list>, test <list>,
-#> #   .id <chr>
+#> # ... with 490 more rows, and 2 more variables: train <list>, test <list>
 ```
 
 We'll add new columns (with `dplyr::mutate`) containing the rsquared values for each set of training and test data by using `purrr` functions.
@@ -330,16 +316,16 @@ results %>% select(cv_pairs.id, train_p, contains("rsquare"))
 #> # A tibble: 500 × 4
 #>    cv_pairs.id train_p rsquare_train rsquare_test
 #>          <chr>   <dbl>         <dbl>        <dbl>
-#> 1           01     0.1     0.4555859    0.2715561
-#> 2           01     0.2     0.3724131    0.3143262
-#> 3           01     0.3     0.3011811    0.3095932
-#> 4           01     0.4     0.3372752    0.3104970
-#> 5           01     0.5     0.3260482    0.3114620
-#> 6           01     0.6     0.3025314    0.3139452
-#> 7           01     0.7     0.3118713    0.3129080
-#> 8           01     0.8     0.3158607    0.3140055
-#> 9           01     0.9     0.3157010    0.3152844
-#> 10          01     1.0     0.3192894    0.3151059
+#> 1           01     0.1     0.4486994    0.2873244
+#> 2           01     0.2     0.3637072    0.3195402
+#> 3           01     0.3     0.2969694    0.3096061
+#> 4           01     0.4     0.3320052    0.3176988
+#> 5           01     0.5     0.3217332    0.3191249
+#> 6           01     0.6     0.2982874    0.3199430
+#> 7           01     0.7     0.3093254    0.3202413
+#> 8           01     0.8     0.3142815    0.3217356
+#> 9           01     0.9     0.3151943    0.3220615
+#> 10          01     1.0     0.3179775    0.3223741
 #> # ... with 490 more rows
 ```
 
