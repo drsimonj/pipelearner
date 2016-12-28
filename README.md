@@ -23,22 +23,28 @@ pipelearner is built on top of [tidyverse](https://github.com/tidyverse/tidyvers
 
 An excellent resource to get started with these is Hadley Wickham's book, [R for Data Science](http://r4ds.had.co.nz/).
 
-The basics
-----------
+API
+---
 
-Like how ggplot2 elements are layered with `+`, pipelearner involves building a pipelearner object, which is a list, with functions that can be piped into eachother with `%>%`:
+Similar to the way ggplot2 elements are layered with `+`, you initialize and customize a pipelearner object, which is a list, with functions that can be piped into eachother with `%>%`. Rather than plotting, however, a pipelearner then learns.
 
--   `pipelearner()` to setup the pipelearner object
--   `learn_cvpairs()` to customize the cross-validation pairs
--   `learn_curves()` to customize the learning curves using incremental proportions of training data
+**Initialize** a pipelearner object with:
+
+-   `pipelearner()`
+
+**Customize** a pipelearner with:
+
+-   `learn_cvpairs()` to customize the cross-validation pairs.
+-   `learn_curves()` to customize the learning curves using incremental proportions of training data.
 -   `learn_models()` to add new learning models.
 
-Once the pipelearner object is setup, call `learn()` to fit everything and `summary()` to extract the results as a tibble.
+**Learn** (fit) everything and obtain a tibble of results with:
 
-Simple case
------------
+-   `learn()`
 
-The following sets up a single regression model `lm` for predicting `Sepal.Length` with all other variables (`Sepal.Length ~ .`) in the `iris` data set.
+### Initialization
+
+The following initializes a pipelearner object that will use the `iris` data set and linear regression (`lm`) to learn how to predict `Sepal.Length` with all other available variables (`Sepal.Length ~ .`).
 
 ``` r
 library(pipelearner)
@@ -46,7 +52,7 @@ library(pipelearner)
 pl <- pipelearner(iris, lm, Sepal.Length ~ .)
 ```
 
-Printing a pipelearner object exposes the list elements:
+Print a pipelearner object to expose the list elements.
 
 ``` r
 pl
@@ -85,12 +91,14 @@ pl
 #> [1] "pipelearner"
 ```
 
-**Defaults** to note:
+##### Defaults to note
 
 -   `data` is split into a single cross-validation pair of resample objects (under `cv_pairs`) referencing 80% of the data for training and 20% for testing.
 -   Learning is done on the entire proportion of the training data (`train_ps == 1`).
 
-When these elements as setup as desired, use `learn()` to fit all models to every combination of training proportions (`train_ps`) and set of training data in the cross-validation pairs (`cv_pairs`), and return a tibble of the results.
+### Learning
+
+Once a pipelearner is setup, use `learn()` to fit all models to every combination of training proportions (`train_ps`) and set of training data in the cross-validation pairs (`cv_pairs`), and return a tibble of the results.
 
 ``` r
 pl %>% learn()
@@ -101,16 +109,16 @@ pl %>% learn()
 #> # ... with 2 more variables: train <list>, test <list>
 ```
 
-Quick notes:
+##### Quick notes
 
 -   `fit` contains the fitted models.
+-   `params` contains all model parameters including the formula.
 -   `train` contains a resample object referencing the data that each model was fitted to.
 -   `test` contains a resample object referencing test data that models were *not* fitted to (for later use).
 
-Cross-validation pairs
-----------------------
+### Cross-validation pairs
 
-Cross-validation pairs can be customized with `learn_cvpairs`. The following implements k-fold cross-validation, creating five folds:
+Cross-validation pairs can be customized with `learn_cvpairs()`. The following implements k-fold cross-validation, creating five folds:
 
 ``` r
 pl %>%
@@ -129,10 +137,9 @@ pl %>%
 
 Notice the five rows where the model has been fitted to training data for each fold, represented by `cv_pairs.id`. The precise training data sets are also stored under `train`.
 
-Learning curves
----------------
+### Learning curves
 
-Learning curves can be customized wth `learn_curves`. The following will fit the model to three proportions of the training data - .5, .75, and 1:
+Learning curves can be customized wth `learn_curves()`. The following will fit the model to three proportions of the training data (.5, .75, and 1):
 
 ``` r
 pl %>% 
@@ -147,10 +154,9 @@ pl %>%
 #> # ... with 2 more variables: train <list>, test <list>
 ```
 
-Notice the three rows where the model has been fitted to the three proportions of the training data, represented by `train_p`. Again, `train` contains references to the exact training data used in each case.
+Notice the three rows where the model has been fitted to the three proportions of the training data, represented by `train_p`. Again, `train` contains references to the precise data used in each case.
 
-More models
------------
+### More models
 
 Add more models with `learn_models()`. For example, the following adds a decision tree to be fitted:
 
@@ -170,9 +176,9 @@ Notice two rows where the regression and decision tree models have been fit to t
 
 Things to know about `learn_models()`:
 
--   It can be called multiple times within the pipeline (unlike the other `learn_*()` functions).
+-   Unlike the other `learn_*()` functions, it can be called multiple times within the pipeline.
 -   It is called implicitly by `pipelearner()` when arguments beyond a data frame are supplied. For example, `pipelearner(d, l, f, ...)` is equivalent to `pipelearner(d) %>% learn_models(l, f, ...)`.
--   Its arguments can all be vectors, which will be expanded to all combinations. This making it easy to do things like compare many models with the same formulas, compare many different formulas, or do grid-search.
+-   Its arguments can all be vectors, which will be expanded to all combinations. This makes it easy to do things like compare many models with the same formulas, compare many different formulas, or do grid-search.
 
 For example, the following fits two models with three formulas:
 
@@ -215,19 +221,24 @@ pipelearner(iris) %>%
 #> # ... with 3 more variables: params <list>, train <list>, test <list>
 ```
 
+Remember that these additional parameters (including different formulas) are contained under `params`.
+
 Bringing it all together
 ------------------------
 
-All of the functions can be combined into a single pipeline. For example, the following will:
+After initialization, pipelearner functions can be combined in a single pipeline. For example, the following will:
 
--   Create 50 cross-validation pairs (holding out random 20% of data by default in each).
--   To each be fitted in proportions of .5 to 1 in increments of .1.
--   With a regression modelling all interactions, and a decision tree modelling all features.
+-   Initialize a blank pipelearner object with the `iris` data set.
+-   Create 50 cross-validation pairs (holding out random 20% of data by default in each)...
+-   to each be fitted in sample size proportions of .5 to 1 in increments of .1.
+-   With a regression modelling all interactions...
+-   and a decision tree modelling all features.
+-   Fit all models and return the results.
 
 ``` r
 iris %>% 
-  pipelearner() %>% 
-  learn_cvpairs(n = 50) %>% 
+  pipelearner() %>%
+  learn_cvpairs(n = 50) %>%
   learn_curves(seq(.5, 1, by = .1)) %>% 
   learn_models(lm, Sepal.Width ~ .*.) %>% 
   learn_models(rpart::rpart, Sepal.Width ~ .) %>% 
@@ -248,10 +259,10 @@ iris %>%
 #> # ... with 590 more rows, and 2 more variables: train <list>, test <list>
 ```
 
-Extracting information from fits
---------------------------------
+Beyond learning
+---------------
 
-As you can see, pipelearner makes it easy to fit many models. The next step is to extract performance metrics from the tibble of results. This is where prior familiarity working with tidyverse tools becomes useful, if not essential.
+As you can see, pipelearner makes it easy to fit many models. The next step is to extract performance metrics from the tibble of results. This is where prior familiarity working with tidyverse tools becomes useful if not essential.
 
 At present, pipelearner doesn't provide functions to extract any further information. This is because the information to be extracted can vary considerably between the models fitted to the data.
 
@@ -318,16 +329,16 @@ results %>% select(cv_pairs.id, train_p, contains("rsquare"))
 #> # A tibble: 500 × 4
 #>    cv_pairs.id train_p rsquare_train rsquare_test
 #>          <chr>   <dbl>         <dbl>        <dbl>
-#> 1           01     0.1     0.4733265    0.1986025
-#> 2           01     0.2     0.3859593    0.2336552
-#> 3           01     0.3     0.3326021    0.2244162
-#> 4           01     0.4     0.3560963    0.2348670
-#> 5           01     0.5     0.3379767    0.2589375
-#> 6           01     0.6     0.3120187    0.2572928
-#> 7           01     0.7     0.3184233    0.2621513
-#> 8           01     0.8     0.3234083    0.2524226
-#> 9           01     0.9     0.3237136    0.2557765
-#> 10          01     1.0     0.3270188    0.2561946
+#> 1           01     0.1     0.4668402    0.2668889
+#> 2           01     0.2     0.3720241    0.3046908
+#> 3           01     0.3     0.2988363    0.3020778
+#> 4           01     0.4     0.3332082    0.3083629
+#> 5           01     0.5     0.3251823    0.3089250
+#> 6           01     0.6     0.3010798    0.3089284
+#> 7           01     0.7     0.3110629    0.3093274
+#> 8           01     0.8     0.3158877    0.3096466
+#> 9           01     0.9     0.3168424    0.3095994
+#> 10          01     1.0     0.3202407    0.3096311
 #> # ... with 490 more rows
 ```
 
@@ -348,4 +359,4 @@ results %>%
         y = "R Squared")
 ```
 
-![](README-unnamed-chunk-15-1.png)
+![](README-eg_curve-1.png)
