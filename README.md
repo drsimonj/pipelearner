@@ -173,31 +173,134 @@ Brining it all together
 
 All of the functions can be combined. For example, the following will:
 
--   Create 100 cross-validation pairs
+-   Create 50 cross-validation pairs (holding out random 20% of data in each)
 -   To each be fitted in proportions of .5 to 1 in increments of .1.
 -   With a regression modelling all interactions, and a decision tree modelling all features.
 
 ``` r
 pipelearner(iris) %>% 
-  learn_cvpairs(n = 100) %>% 
+  learn_cvpairs(n = 50) %>% 
   learn_curves(seq(.5, 1, by = .1)) %>% 
   learn_models(c(lm), Sepal.Width ~ .*.) %>% 
   learn_models(c(rpart::rpart), Sepal.Width ~ .) %>% 
   learn() %>% 
   summary()
-#> # A tibble: 1,200 × 10
+#> # A tibble: 600 × 10
 #>    models.id cv_pairs.id train_p      fit      target model     params
 #>        <chr>       <chr>   <dbl>   <list>       <chr> <chr>     <list>
-#> 1          1         001     0.5 <S3: lm> Sepal.Width    lm <list [1]>
-#> 2          1         001     0.6 <S3: lm> Sepal.Width    lm <list [1]>
-#> 3          1         001     0.7 <S3: lm> Sepal.Width    lm <list [1]>
-#> 4          1         001     0.8 <S3: lm> Sepal.Width    lm <list [1]>
-#> 5          1         001     0.9 <S3: lm> Sepal.Width    lm <list [1]>
-#> 6          1         001     1.0 <S3: lm> Sepal.Width    lm <list [1]>
-#> 7          1         002     0.5 <S3: lm> Sepal.Width    lm <list [1]>
-#> 8          1         002     0.6 <S3: lm> Sepal.Width    lm <list [1]>
-#> 9          1         002     0.7 <S3: lm> Sepal.Width    lm <list [1]>
-#> 10         1         002     0.8 <S3: lm> Sepal.Width    lm <list [1]>
-#> # ... with 1,190 more rows, and 3 more variables: train <list>,
-#> #   test <list>, .id <chr>
+#> 1          1          01     0.5 <S3: lm> Sepal.Width    lm <list [1]>
+#> 2          1          01     0.6 <S3: lm> Sepal.Width    lm <list [1]>
+#> 3          1          01     0.7 <S3: lm> Sepal.Width    lm <list [1]>
+#> 4          1          01     0.8 <S3: lm> Sepal.Width    lm <list [1]>
+#> 5          1          01     0.9 <S3: lm> Sepal.Width    lm <list [1]>
+#> 6          1          01     1.0 <S3: lm> Sepal.Width    lm <list [1]>
+#> 7          1          02     0.5 <S3: lm> Sepal.Width    lm <list [1]>
+#> 8          1          02     0.6 <S3: lm> Sepal.Width    lm <list [1]>
+#> 9          1          02     0.7 <S3: lm> Sepal.Width    lm <list [1]>
+#> 10         1          02     0.8 <S3: lm> Sepal.Width    lm <list [1]>
+#> # ... with 590 more rows, and 3 more variables: train <list>, test <list>,
+#> #   .id <chr>
 ```
+
+Extracting information from fits
+--------------------------------
+
+As you can see, pipelearner makes it easy to fit many models. The next step is to extract performance metrics from the tibble of results. This is where prior familiarity working with tidyverse tools becomes useful, if not essential.
+
+At present, pipelearner doesn't provide functions to extract any further information. This is because the information to be extracted can vary considerably between the models fitted to the data.
+
+The following will demonstrate an example of visualising learning curves by extracting performance information from regression models.
+
+We'll use the following function `r_square()`, modelled after `modelr::rsquare`, but adjusted to handle new data sets (I've submitted an issue to incorporate into `modelr`).
+
+``` r
+# R-Squared scoring (because modelr rsquare doen't work right now)
+response_var <- function(model) {
+  formula(model)[[2L]]
+}
+response <- function(model, data) {
+  eval(response_var(model), as.data.frame(data))
+}
+r_square <- function(model, data) {
+  actual    <- response(model, data)
+  residuals <- predict(model, data) - actual
+  1 - (var(residuals, na.rm = TRUE) / var(actual, na.rm = TRUE))
+}
+```
+
+Using the `weather` data from the `nycflights13` package, fit a single regression model to 50 cross-validation pairs, holding out 15% of the data for testing in each case, in iterative training proportions:
+
+``` r
+library(nycflights13)
+
+results <- pipelearner(weather) %>% 
+  learn_cvpairs(n = 50, test = .15) %>% 
+  learn_curves(seq(.1, 1, by = .1)) %>% 
+  learn_models(c(lm), visib ~ humid + precip + wind_dir) %>% 
+  learn() %>% 
+  summary()
+results
+#> # A tibble: 500 × 10
+#>    models.id cv_pairs.id train_p      fit target model     params
+#>        <chr>       <chr>   <dbl>   <list>  <chr> <chr>     <list>
+#> 1          1          01     0.1 <S3: lm>  visib    lm <list [1]>
+#> 2          1          01     0.2 <S3: lm>  visib    lm <list [1]>
+#> 3          1          01     0.3 <S3: lm>  visib    lm <list [1]>
+#> 4          1          01     0.4 <S3: lm>  visib    lm <list [1]>
+#> 5          1          01     0.5 <S3: lm>  visib    lm <list [1]>
+#> 6          1          01     0.6 <S3: lm>  visib    lm <list [1]>
+#> 7          1          01     0.7 <S3: lm>  visib    lm <list [1]>
+#> 8          1          01     0.8 <S3: lm>  visib    lm <list [1]>
+#> 9          1          01     0.9 <S3: lm>  visib    lm <list [1]>
+#> 10         1          01     1.0 <S3: lm>  visib    lm <list [1]>
+#> # ... with 490 more rows, and 3 more variables: train <list>, test <list>,
+#> #   .id <chr>
+```
+
+We'll add new columns (with `dplyr::mutate`) containing the rsquared values for each set of training and test data by using `purrr` functions.
+
+``` r
+library(purrr)
+library(dplyr)
+
+results <- results %>% 
+  mutate(
+    rsquare_train = map2_dbl(fit, train, r_square),
+    rsquare_test  = map2_dbl(fit, test,  r_square)
+  )
+
+results %>% select(cv_pairs.id, train_p, contains("rsquare"))
+#> # A tibble: 500 × 4
+#>    cv_pairs.id train_p rsquare_train rsquare_test
+#>          <chr>   <dbl>         <dbl>        <dbl>
+#> 1           01     0.1     0.4547046    0.2882677
+#> 2           01     0.2     0.3708495    0.3190125
+#> 3           01     0.3     0.2997861    0.3110033
+#> 4           01     0.4     0.3344001    0.3174281
+#> 5           01     0.5     0.3228480    0.3175361
+#> 6           01     0.6     0.2982186    0.3182649
+#> 7           01     0.7     0.3087643    0.3186599
+#> 8           01     0.8     0.3128053    0.3198158
+#> 9           01     0.9     0.3138884    0.3201375
+#> 10          01     1.0     0.3183582    0.3204611
+#> # ... with 490 more rows
+```
+
+We can visualize these learning curves as follows:
+
+``` r
+library(tidyr)
+library(ggplot2)
+
+results %>% 
+  select(train_p, contains("rsquare")) %>% 
+  gather(source, rsquare, contains("rsquare")) %>% 
+  ggplot(aes(train_p, rsquare, color = source)) +
+   geom_jitter(width = .03, alpha = .3) +
+   stat_summary(geom = "line", fun.y = mean) +
+   stat_summary(geom = "point", fun.y = mean, size = 4) +
+   labs(x = "Proportion of training data used",
+        y = "R Squared")
+```
+
+![](README-unnamed-chunk-13-1.png)

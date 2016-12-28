@@ -128,17 +128,92 @@ pipelearner(iris) %>%
 
 All of the functions can be combined. For example, the following will:
 
-- Create 100 cross-validation pairs
+- Create 50 cross-validation pairs (holding out random 20% of data in each)
 - To each be fitted in proportions of .5 to 1 in increments of .1.
 - With a regression modelling all interactions, and a decision tree modelling all features.
 
 ```{r}
 pipelearner(iris) %>% 
-  learn_cvpairs(n = 100) %>% 
+  learn_cvpairs(n = 50) %>% 
   learn_curves(seq(.5, 1, by = .1)) %>% 
   learn_models(c(lm), Sepal.Width ~ .*.) %>% 
   learn_models(c(rpart::rpart), Sepal.Width ~ .) %>% 
   learn() %>% 
   summary()
 ```
+
+## Extracting information from fits
+
+As you can see, pipelearner makes it easy to fit many models. The next step is to extract performance metrics from the tibble of results. This is where prior familiarity working with tidyverse tools becomes useful, if not essential.
+
+At present, pipelearner doesn't provide functions to extract any further information. This is because the information to be extracted can vary considerably between the models fitted to the data.
+
+The following will demonstrate an example of visualising learning curves by extracting performance information from regression models.
+
+We'll use the following function `r_square()`, modelled after `modelr::rsquare`, but adjusted to handle new data sets (I've submitted an issue to incorporate into `modelr`).
+
+```{r}
+# R-Squared scoring (because modelr rsquare doen't work right now)
+response_var <- function(model) {
+  formula(model)[[2L]]
+}
+response <- function(model, data) {
+  eval(response_var(model), as.data.frame(data))
+}
+r_square <- function(model, data) {
+  actual    <- response(model, data)
+  residuals <- predict(model, data) - actual
+  1 - (var(residuals, na.rm = TRUE) / var(actual, na.rm = TRUE))
+}
+```
+
+Using the `weather` data from the `nycflights13` package, fit a single regression model to 50 cross-validation pairs, holding out 15% of the data for testing in each case, in iterative training proportions:
+
+```{r}
+library(nycflights13)
+
+results <- pipelearner(weather) %>% 
+  learn_cvpairs(n = 50, test = .15) %>% 
+  learn_curves(seq(.1, 1, by = .1)) %>% 
+  learn_models(c(lm), visib ~ humid + precip + wind_dir) %>% 
+  learn() %>% 
+  summary()
+results
+```
+
+We'll add new columns (with `dplyr::mutate`) containing the rsquared values for each set of training and test data by using `purrr` functions.
+
+```{r, message = F}
+library(purrr)
+library(dplyr)
+
+results <- results %>% 
+  mutate(
+    rsquare_train = map2_dbl(fit, train, r_square),
+    rsquare_test  = map2_dbl(fit, test,  r_square)
+  )
+
+results %>% select(cv_pairs.id, train_p, contains("rsquare"))
+```
+
+We can visualize these learning curves as follows:
+
+```{r}
+library(tidyr)
+library(ggplot2)
+
+results %>% 
+  select(train_p, contains("rsquare")) %>% 
+  gather(source, rsquare, contains("rsquare")) %>% 
+  ggplot(aes(train_p, rsquare, color = source)) +
+   geom_jitter(width = .03, alpha = .3) +
+   stat_summary(geom = "line", fun.y = mean) +
+   stat_summary(geom = "point", fun.y = mean, size = 4) +
+   labs(x = "Proportion of training data used",
+        y = "R Squared")
+```
+
+
+
+
 
