@@ -28,7 +28,7 @@ learn_models.default <- function(pl, models, formulas, ...) {
 learn_models.pipelearner <- function(pl, models, formulas, ...) {
 
   # Get model names (needs to happen first)
-  model_names <- lazyeval::expr_find(models) %>% as.character()
+  model_names <- lazyeval::expr_text(models)
   if (length(model_names) > 1) model_names <- model_names[-1]
 
   # Argument checks
