@@ -24,15 +24,18 @@ pipelearner is currently available from github as a development package only. It
 devtools::install_github("drsimonj/pipelearner")
 ```
 
-pipelearner is built on top of [tidyverse](https://github.com/tidyverse/tidyverse) packages like [modelr](https://github.com/hadley/modelr). To harness the full power of pipelearner, you should be familiar with tidyverse tools and principles. In particular, it will help to understand the following:
+pipelearner is built on top of [tidyverse](https://github.com/tidyverse/tidyverse) packages like [modelr](https://github.com/hadley/modelr). To harness the full power of pipelearner, it will help to possess some technical knowledge of tidyverse tools such as:
 
-- `%>%`, the pipe operator from magrittr package.
-- tibbles and how to iterate through them with the likes of `purrr`.
-- It would also help to be familiar with `resample` objects from the [modelr](https://github.com/hadley/modelr) package.
+- `%>%` the pipe operator from [magrittr]() package.
+- tibbles from [tibble]() package.
+- `map()` and other iteration functions from [purrr]() package.
+- `resample` objects from [modelr](https://github.com/hadley/modelr) package.
+
+An excellent resource to get started with these is Hadley Wickham's book, [R for Data Science](http://r4ds.had.co.nz/).
 
 ## The basics
 
-Similar to the way ggplot2 elements are layered with `+`, pipelearner involves building a pipelearner object, which is a list, with functions that can be piped into eachother with `%>%`:
+Like how ggplot2 elements are layered with `+`, pipelearner involves building a pipelearner object, which is a list, with functions that can be piped into eachother with `%>%`:
 
 - `pipelearner()` to setup the pipelearner object
 - `learn_cvpairs()` to customize the cross-validation pairs
@@ -41,24 +44,38 @@ Similar to the way ggplot2 elements are layered with `+`, pipelearner involves b
 
 Once the pipelearner object is setup, call `learn()` to fit everything and `summary()` to extract the results as a tibble.
 
-An important thing to note is that "fit everything" means that pieplearner fits all combinations of the specified models, sets of training data in the cross-validation pairs, with proportions defined by the learning curves.
-
 ## Simple case
 
-The following trains a single regression model for predicting `Sepal.Length` with all other variables in the iris data set.
+The following sets up a single regression model `lm` for predicting `Sepal.Length` with all other variables (`Sepal.Length ~ .`) in the `iris` data set.
 
 ```{r}
 library(pipelearner)
 
-pl <- pipelearner(iris) %>% learn_models(lm, Sepal.Length ~ .)
+pl <- pipelearner(iris, lm, Sepal.Length ~ .)
+```
 
+Printing a pipelearner object exposes the list elements:
+
+```{r}
+pl
+```
+
+**Defaults** to note:
+
+- `data` is split into a single cross-validation pair of resample objects (under `cv_pairs`) referencing 80% of the data for training and 20% for testing.
+- Learning is done on the entire proportion of the training data (`train_ps == 1`).
+
+When we've setup these elements as desired, use `learn()` to fit all models to every combination of training proportions (`train_ps`) and set of training data in the cross-validation pairs (`cv_pairs`). Use `summary()` to obtain a tibble of the results. 
+
+```{r}
 pl %>% learn() %>% summary()
 ```
 
-- A pipelearner object is created and setup to use the iris data set with `pipelearner(iris)`. By default, this creates a single cross-validation pair by randomly selecting 80% of the data for training, and separating 20% to be used as a test set.
-- A linear regression model, predicting Sepal.Length with all other variables, is specified by piping the object to `learn_models(lm, Sepal.Length ~ .)`.
-- The model is fit to the training data by piping into `learn()`.
-- Results are extracted as a tibble with `summary()`. The tibble contains our fitted regression model under `fit`, the training data it was fit on under `train`, and a `test` data set to predict on.
+Quick notes:
+
+- `fit` contains our fitted model.
+- `train` contains a resample object referencing the data that model was fitted to.
+- `test` contains a resample object referencing test data that our model was *not* fitted to (for later use).
 
 ## Cross-validation pairs
 
@@ -92,13 +109,16 @@ We can add many models with `learn_models()`, which, unlike the previous functio
 
 ```{r}
 pl %>% 
-  learn_models(c(rpart::rpart), Sepal.Length ~ .) %>% 
+  learn_models(rpart::rpart, Sepal.Length ~ .) %>% 
   learn() %>% 
   summary()
 ```
 
 Notice two rows where the regression and decision tree models have been fit to the training data, represented by `models.id`.
 
+Two things to know about `learn_models()`:
+
+- When arguments beyond a data frame are supplied to `pipelearner()`, such as `lm` and the formula above, these are used by `learn_models()`. This makes calls like `pipelearner(d, l, f, ...)` the same as `pipelearner(d) %>% learn_models(l, f, ...)`.
 `learn_models()` is very flexible. It will take a pipelearner object followed by a vector of model functions, a vector of formulas, and vector of any additional hyperparameters. When vectors are provided, all combinations are expanded, making it easy to do things like compare many models with the same formulas, compare many different formulas, or do grid-search.
 
 For example, the following compares linear regression and a decision tree over different formulas:
@@ -117,8 +137,8 @@ The following tests a regression model and grid-searches hyperparameters of a de
 
 ```{r}
 pipelearner(iris) %>%
-  learn_models(c(lm), Sepal.Length ~ .) %>% 
-  learn_models(c(rpart::rpart), Sepal.Length ~ .,
+  learn_models(lm, Sepal.Length ~ .) %>% 
+  learn_models(rpart::rpart, Sepal.Length ~ .,
                minsplit = c(2, 20), cp = c(0.01, 0.1)) %>% 
   learn() %>% 
   summary()
@@ -133,11 +153,12 @@ All of the functions can be combined. For example, the following will:
 - With a regression modelling all interactions, and a decision tree modelling all features.
 
 ```{r}
-pipelearner(iris) %>% 
+iris %>% 
+  pipelearner() %>% 
   learn_cvpairs(n = 50) %>% 
   learn_curves(seq(.5, 1, by = .1)) %>% 
-  learn_models(c(lm), Sepal.Width ~ .*.) %>% 
-  learn_models(c(rpart::rpart), Sepal.Width ~ .) %>% 
+  learn_models(lm, Sepal.Width ~ .*.) %>% 
+  learn_models(rpart::rpart, Sepal.Width ~ .) %>% 
   learn() %>% 
   summary()
 ```
@@ -172,10 +193,11 @@ Using the `weather` data from the `nycflights13` package, fit a single regressio
 ```{r}
 library(nycflights13)
 
-results <- pipelearner(weather) %>% 
+results <- weather %>% 
+  pipelearner() %>% 
   learn_cvpairs(n = 50, test = .15) %>% 
   learn_curves(seq(.1, 1, by = .1)) %>% 
-  learn_models(c(lm), visib ~ humid + precip + wind_dir) %>% 
+  learn_models(lm, visib ~ humid + precip + wind_dir) %>% 
   learn() %>% 
   summary()
 results
