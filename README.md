@@ -90,7 +90,7 @@ pl
 -   `data` is split into a single cross-validation pair of resample objects (under `cv_pairs`) referencing 80% of the data for training and 20% for testing.
 -   Learning is done on the entire proportion of the training data (`train_ps == 1`).
 
-When we've setup these elements as desired, use `learn()` to fit all models to every combination of training proportions (`train_ps`) and set of training data in the cross-validation pairs (`cv_pairs`), and return a tibble of the results.
+When these elements as setup as desired, use `learn()` to fit all models to every combination of training proportions (`train_ps`) and set of training data in the cross-validation pairs (`cv_pairs`), and return a tibble of the results.
 
 ``` r
 pl %>% learn()
@@ -103,9 +103,9 @@ pl %>% learn()
 
 Quick notes:
 
--   `fit` contains our fitted model.
--   `train` contains a resample object referencing the data that model was fitted to.
--   `test` contains a resample object referencing test data that our model was *not* fitted to (for later use).
+-   `fit` contains the fitted models.
+-   `train` contains a resample object referencing the data that each model was fitted to.
+-   `test` contains a resample object referencing test data that models were *not* fitted to (for later use).
 
 Cross-validation pairs
 ----------------------
@@ -127,7 +127,7 @@ pl %>%
 #> # ... with 2 more variables: train <list>, test <list>
 ```
 
-Notice the five rows where the model has been fitted to training data for each fold, represented by `cv_pairs.id`.
+Notice the five rows where the model has been fitted to training data for each fold, represented by `cv_pairs.id`. The precise training data sets are also stored under `train`.
 
 Learning curves
 ---------------
@@ -147,12 +147,12 @@ pl %>%
 #> # ... with 2 more variables: train <list>, test <list>
 ```
 
-Notice the three rows where the model has been fitted to the three proportions of the training data, represented by `train_p`.
+Notice the three rows where the model has been fitted to the three proportions of the training data, represented by `train_p`. Again, `train` contains references to the exact training data used in each case.
 
 More models
 -----------
 
-We can add many models with `learn_models()`, which, unlike the previous functions, we can use many times. For example, the following adds a decision tree to be fitted:
+Add more models with `learn_models()`. For example, the following adds a decision tree to be fitted:
 
 ``` r
 pl %>% 
@@ -166,13 +166,15 @@ pl %>%
 #> # ... with 3 more variables: params <list>, train <list>, test <list>
 ```
 
-Notice two rows where the regression and decision tree models have been fit to the training data, represented by `models.id`.
+Notice two rows where the regression and decision tree models have been fit to the training data, represented by `models.id`. The different model calls also appear under `model`.
 
-Two things to know about `learn_models()`:
+Things to know about `learn_models()`:
 
--   When arguments beyond a data frame are supplied to `pipelearner()`, such as `lm` and the formula above, these are used by `learn_models()`. This makes calls like `pipelearner(d, l, f, ...)` the same as `pipelearner(d) %>% learn_models(l, f, ...)`. `learn_models()` is very flexible. It will take a pipelearner object followed by a vector of model functions, a vector of formulas, and vector of any additional hyperparameters. When vectors are provided, all combinations are expanded, making it easy to do things like compare many models with the same formulas, compare many different formulas, or do grid-search.
+-   It can be called multiple times within the pipeline (unlike the other `learn_*()` functions).
+-   It is called implicitly by `pipelearner()` when arguments beyond a data frame are supplied. For example, `pipelearner(d, l, f, ...)` is equivalent to `pipelearner(d) %>% learn_models(l, f, ...)`.
+-   Its arguments can all be vectors, which will be expanded to all combinations. This making it easy to do things like compare many models with the same formulas, compare many different formulas, or do grid-search.
 
-For example, the following compares linear regression and a decision tree over different formulas:
+For example, the following fits two models with three formulas:
 
 ``` r
 pipelearner(iris) %>%
@@ -194,7 +196,7 @@ pipelearner(iris) %>%
 #> #   test <list>
 ```
 
-The following tests a regression model and grid-searches hyperparameters of a decision tree:
+The following fits a regression model and grid-searches hyperparameters of a decision tree:
 
 ``` r
 pipelearner(iris) %>%
@@ -213,12 +215,12 @@ pipelearner(iris) %>%
 #> # ... with 3 more variables: params <list>, train <list>, test <list>
 ```
 
-Brining it all together
------------------------
+Bringing it all together
+------------------------
 
-All of the functions can be combined. For example, the following will:
+All of the functions can be combined into a single pipeline. For example, the following will:
 
--   Create 50 cross-validation pairs (holding out random 20% of data in each)
+-   Create 50 cross-validation pairs (holding out random 20% of data by default in each).
 -   To each be fitted in proportions of .5 to 1 in increments of .1.
 -   With a regression modelling all interactions, and a decision tree modelling all features.
 
@@ -255,7 +257,7 @@ At present, pipelearner doesn't provide functions to extract any further informa
 
 The following will demonstrate an example of visualising learning curves by extracting performance information from regression models.
 
-We'll use the following function `r_square()`, modelled after `modelr::rsquare`, but adjusted to handle new data sets (I've submitted an issue to incorporate into `modelr`).
+`r_square()` is setup to extract an R-squared value. It is based on `modelr::rsquare`, but adjusted to handle new data sets (I've submitted an issue to incorporate into `modelr`).
 
 ``` r
 # R-Squared scoring (because modelr rsquare doen't work right now)
@@ -300,7 +302,7 @@ results
 #> # ... with 490 more rows, and 2 more variables: train <list>, test <list>
 ```
 
-We'll add new columns (with `dplyr::mutate`) containing the rsquared values for each set of training and test data by using `purrr` functions.
+New columns are added with `dplyr::mutate` containing the rsquared values for each set of training and test data by using `purrr` functions.
 
 ``` r
 library(purrr)
@@ -316,16 +318,16 @@ results %>% select(cv_pairs.id, train_p, contains("rsquare"))
 #> # A tibble: 500 × 4
 #>    cv_pairs.id train_p rsquare_train rsquare_test
 #>          <chr>   <dbl>         <dbl>        <dbl>
-#> 1           01     0.1     0.4486994    0.2873244
-#> 2           01     0.2     0.3637072    0.3195402
-#> 3           01     0.3     0.2969694    0.3096061
-#> 4           01     0.4     0.3320052    0.3176988
-#> 5           01     0.5     0.3217332    0.3191249
-#> 6           01     0.6     0.2982874    0.3199430
-#> 7           01     0.7     0.3093254    0.3202413
-#> 8           01     0.8     0.3142815    0.3217356
-#> 9           01     0.9     0.3151943    0.3220615
-#> 10          01     1.0     0.3179775    0.3223741
+#> 1           01     0.1     0.4733265    0.1986025
+#> 2           01     0.2     0.3859593    0.2336552
+#> 3           01     0.3     0.3326021    0.2244162
+#> 4           01     0.4     0.3560963    0.2348670
+#> 5           01     0.5     0.3379767    0.2589375
+#> 6           01     0.6     0.3120187    0.2572928
+#> 7           01     0.7     0.3184233    0.2621513
+#> 8           01     0.8     0.3234083    0.2524226
+#> 9           01     0.9     0.3237136    0.2557765
+#> 10          01     1.0     0.3270188    0.2561946
 #> # ... with 490 more rows
 ```
 
