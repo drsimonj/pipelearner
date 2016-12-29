@@ -26,12 +26,12 @@ devtools::install_github("drsimonj/pipelearner")
 
 pipelearner is built on top of [tidyverse](https://github.com/tidyverse/tidyverse) packages like [modelr](https://github.com/hadley/modelr). To harness the full power of pipelearner, it will help to possess some technical knowledge of tidyverse tools such as:
 
-- `%>%` the pipe operator from [magrittr]() package.
-- tibbles from [tibble]() package.
-- `map()` and other iteration functions from [purrr]() package.
+- `%>%` the pipe operator from [magrittr](https://github.com/tidyverse/magrittr) package.
+- tibbles from [tibble](https://github.com/tidyverse/tibble) package.
+- `map()` and other iteration functions from [purrr](https://github.com/hadley/purrr) package.
 - `resample` objects from [modelr](https://github.com/hadley/modelr) package.
 
-An excellent resource to get started with these is Hadley Wickham's book, [R for Data Science](http://r4ds.had.co.nz/).
+An excellent resource to get started with these is [R for Data Science](http://r4ds.had.co.nz/), by Garrett Grolemund and Hadley Wickham.
 
 ## API
 
@@ -181,7 +181,7 @@ At present, pipelearner doesn't provide functions to extract any further informa
 
 The following will demonstrate an example of visualising learning curves by extracting performance information from regression models.
 
-`r_square()` is setup to extract an R-squared value. It is based on `modelr::rsquare`, but adjusted to handle new data sets (I've submitted an issue to incorporate into `modelr`).
+`r_square()` is setup to extract an R-squared value. It is based on `modelr::rsquare`, but adjusted to handle new data sets (I've submitted [an issue](https://github.com/hadley/modelr/issues/37) to incorporate into `modelr`).
 
 ```{r}
 # R-Squared scoring (because modelr rsquare doen't work right now)
@@ -198,16 +198,23 @@ r_square <- function(model, data) {
 }
 ```
 
-Using the `weather` data from the `nycflights13` package, fit a single regression model to 50 cross-validation pairs, holding out 15% of the data for testing in each case, in iterative training proportions:
+Using a subset of the `weather` data from the `nycflights13` package, fit a single regression model to 50 cross-validation pairs, holding out 15% of the data for testing in each case, in iterative training proportions. Note heavy use of tidyverse functions.
 
-```{r}
+```{r, message = F}
+library(tidyverse)
+
+# Create the data set
 library(nycflights13)
+d <- weather %>%
+  select(visib, humid, precip, wind_dir) %>% 
+  drop_na() %>%
+  sample_n(2000)
 
-results <- weather %>% 
+results <- d %>% 
   pipelearner() %>% 
   learn_cvpairs(n = 50, test = .15) %>% 
   learn_curves(seq(.1, 1, by = .1)) %>% 
-  learn_models(lm, visib ~ humid + precip + wind_dir) %>% 
+  learn_models(lm, visib ~ .) %>% 
   learn()
 results
 ```
@@ -215,9 +222,6 @@ results
 New columns are added with `dplyr::mutate` containing the rsquared values for each set of training and test data by using `purrr` functions.
 
 ```{r, message = F}
-library(purrr)
-library(dplyr)
-
 results <- results %>% 
   mutate(
     rsquare_train = map2_dbl(fit, train, r_square),
@@ -230,9 +234,6 @@ results %>% select(cv_pairs.id, train_p, contains("rsquare"))
 We can visualize these learning curves as follows:
 
 ```{r eg_curve}
-library(tidyr)
-library(ggplot2)
-
 results %>% 
   select(train_p, contains("rsquare")) %>% 
   gather(source, rsquare, contains("rsquare")) %>% 
@@ -241,5 +242,32 @@ results %>%
    stat_summary(geom = "line", fun.y = mean) +
    stat_summary(geom = "point", fun.y = mean, size = 4) +
    labs(x = "Proportion of training data used",
+        y = "R Squared")
+```
+
+The example below fits a decision tree and random forest to 20 folds of a subset of the data.
+
+```{r}
+results <-  d %>% 
+  pipelearner() %>% 
+  learn_cvpairs(k = 20) %>% 
+  learn_models(c(rpart::rpart, randomForest::randomForest), 
+               visib ~ .) %>% 
+  learn()
+results
+```
+
+Then compute R-Square statistics and visualize the results:
+
+```{r eg_2models, message = F}
+results %>% 
+  mutate(rsquare_train = map2_dbl(fit, train, r_square),
+         rsquare_test  = map2_dbl(fit, test,  r_square)) %>% 
+  select(model, contains("rsquare")) %>% 
+  gather(source, rsquare, contains("rsquare")) %>%
+  ggplot(aes(model, rsquare, color = source)) +
+   geom_jitter(width = .05, alpha = .3) +
+   stat_summary(geom = "point", fun.y = mean, size = 4) +
+   labs(x = "Learning model",
         y = "R Squared")
 ```

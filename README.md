@@ -16,12 +16,12 @@ devtools::install_github("drsimonj/pipelearner")
 
 pipelearner is built on top of [tidyverse](https://github.com/tidyverse/tidyverse) packages like [modelr](https://github.com/hadley/modelr). To harness the full power of pipelearner, it will help to possess some technical knowledge of tidyverse tools such as:
 
--   `%>%` the pipe operator from [magrittr]() package.
--   tibbles from [tibble]() package.
--   `map()` and other iteration functions from [purrr]() package.
+-   `%>%` the pipe operator from [magrittr](https://github.com/tidyverse/magrittr) package.
+-   tibbles from [tibble](https://github.com/tidyverse/tibble) package.
+-   `map()` and other iteration functions from [purrr](https://github.com/hadley/purrr) package.
 -   `resample` objects from [modelr](https://github.com/hadley/modelr) package.
 
-An excellent resource to get started with these is Hadley Wickham's book, [R for Data Science](http://r4ds.had.co.nz/).
+An excellent resource to get started with these is [R for Data Science](http://r4ds.had.co.nz/), by Garrett Grolemund and Hadley Wickham.
 
 API
 ---
@@ -165,11 +165,11 @@ pl %>%
   learn_models(rpart::rpart, Sepal.Length ~ .) %>% 
   learn()
 #> # A tibble: 2 × 9
-#>   models.id cv_pairs.id train_p         fit       target        model
-#>       <chr>       <chr>   <dbl>      <list>        <chr>        <chr>
-#> 1         1           1       1    <S3: lm> Sepal.Length           lm
-#> 2         2           1       1 <S3: rpart> Sepal.Length rpart::rpart
-#> # ... with 3 more variables: params <list>, train <list>, test <list>
+#>   models.id cv_pairs.id train_p         fit       target model     params
+#>       <chr>       <chr>   <dbl>      <list>        <chr> <chr>     <list>
+#> 1         1           1       1    <S3: lm> Sepal.Length    lm <list [1]>
+#> 2         2           1       1 <S3: rpart> Sepal.Length rpart <list [1]>
+#> # ... with 2 more variables: train <list>, test <list>
 ```
 
 Notice two rows where the regression and decision tree models have been fit to the training data, represented by `models.id`. The different model calls also appear under `model`.
@@ -190,16 +190,15 @@ pipelearner(iris) %>%
                  Sepal.Length ~ Sepal.Width + Petal.Length + Species)) %>% 
   learn()
 #> # A tibble: 6 × 9
-#>   models.id cv_pairs.id train_p         fit       target
-#>       <chr>       <chr>   <dbl>      <list>        <chr>
-#> 1         1           1       1    <S3: lm> Sepal.Length
-#> 2         2           1       1 <S3: rpart> Sepal.Length
-#> 3         3           1       1    <S3: lm> Sepal.Length
-#> 4         4           1       1 <S3: rpart> Sepal.Length
-#> 5         5           1       1    <S3: lm> Sepal.Length
-#> 6         6           1       1 <S3: rpart> Sepal.Length
-#> # ... with 4 more variables: model <chr>, params <list>, train <list>,
-#> #   test <list>
+#>   models.id cv_pairs.id train_p         fit       target        model
+#>       <chr>       <chr>   <dbl>      <list>        <chr>        <chr>
+#> 1         1           1       1    <S3: lm> Sepal.Length           lm
+#> 2         2           1       1 <S3: rpart> Sepal.Length rpart::rpart
+#> 3         3           1       1    <S3: lm> Sepal.Length           lm
+#> 4         4           1       1 <S3: rpart> Sepal.Length rpart::rpart
+#> 5         5           1       1    <S3: lm> Sepal.Length           lm
+#> 6         6           1       1 <S3: rpart> Sepal.Length rpart::rpart
+#> # ... with 3 more variables: params <list>, train <list>, test <list>
 ```
 
 The following fits a regression model and grid-searches hyperparameters of a decision tree:
@@ -211,14 +210,14 @@ pipelearner(iris) %>%
                minsplit = c(2, 20), cp = c(0.01, 0.1)) %>% 
   learn()
 #> # A tibble: 5 × 9
-#>   models.id cv_pairs.id train_p         fit       target        model
-#>       <chr>       <chr>   <dbl>      <list>        <chr>        <chr>
-#> 1         1           1       1    <S3: lm> Sepal.Length           lm
-#> 2         2           1       1 <S3: rpart> Sepal.Length rpart::rpart
-#> 3         3           1       1 <S3: rpart> Sepal.Length rpart::rpart
-#> 4         4           1       1 <S3: rpart> Sepal.Length rpart::rpart
-#> 5         5           1       1 <S3: rpart> Sepal.Length rpart::rpart
-#> # ... with 3 more variables: params <list>, train <list>, test <list>
+#>   models.id cv_pairs.id train_p         fit       target model     params
+#>       <chr>       <chr>   <dbl>      <list>        <chr> <chr>     <list>
+#> 1         1           1       1    <S3: lm> Sepal.Length    lm <list [1]>
+#> 2         2           1       1 <S3: rpart> Sepal.Length rpart <list [3]>
+#> 3         3           1       1 <S3: rpart> Sepal.Length rpart <list [3]>
+#> 4         4           1       1 <S3: rpart> Sepal.Length rpart <list [3]>
+#> 5         5           1       1 <S3: rpart> Sepal.Length rpart <list [3]>
+#> # ... with 2 more variables: train <list>, test <list>
 ```
 
 Remember that these additional parameters (including different formulas) are contained under `params`.
@@ -268,7 +267,7 @@ At present, pipelearner doesn't provide functions to extract any further informa
 
 The following will demonstrate an example of visualising learning curves by extracting performance information from regression models.
 
-`r_square()` is setup to extract an R-squared value. It is based on `modelr::rsquare`, but adjusted to handle new data sets (I've submitted an issue to incorporate into `modelr`).
+`r_square()` is setup to extract an R-squared value. It is based on `modelr::rsquare`, but adjusted to handle new data sets (I've submitted [an issue](https://github.com/hadley/modelr/issues/37) to incorporate into `modelr`).
 
 ``` r
 # R-Squared scoring (because modelr rsquare doen't work right now)
@@ -285,16 +284,23 @@ r_square <- function(model, data) {
 }
 ```
 
-Using the `weather` data from the `nycflights13` package, fit a single regression model to 50 cross-validation pairs, holding out 15% of the data for testing in each case, in iterative training proportions:
+Using a subset of the `weather` data from the `nycflights13` package, fit a single regression model to 50 cross-validation pairs, holding out 15% of the data for testing in each case, in iterative training proportions. Note heavy use of tidyverse functions.
 
 ``` r
-library(nycflights13)
+library(tidyverse)
 
-results <- weather %>% 
+# Create the data set
+library(nycflights13)
+d <- weather %>%
+  select(visib, humid, precip, wind_dir) %>% 
+  drop_na() %>%
+  sample_n(2000)
+
+results <- d %>% 
   pipelearner() %>% 
   learn_cvpairs(n = 50, test = .15) %>% 
   learn_curves(seq(.1, 1, by = .1)) %>% 
-  learn_models(lm, visib ~ humid + precip + wind_dir) %>% 
+  learn_models(lm, visib ~ .) %>% 
   learn()
 results
 #> # A tibble: 500 × 9
@@ -316,9 +322,6 @@ results
 New columns are added with `dplyr::mutate` containing the rsquared values for each set of training and test data by using `purrr` functions.
 
 ``` r
-library(purrr)
-library(dplyr)
-
 results <- results %>% 
   mutate(
     rsquare_train = map2_dbl(fit, train, r_square),
@@ -329,25 +332,22 @@ results %>% select(cv_pairs.id, train_p, contains("rsquare"))
 #> # A tibble: 500 × 4
 #>    cv_pairs.id train_p rsquare_train rsquare_test
 #>          <chr>   <dbl>         <dbl>        <dbl>
-#> 1           01     0.1     0.4668402    0.2668889
-#> 2           01     0.2     0.3720241    0.3046908
-#> 3           01     0.3     0.2988363    0.3020778
-#> 4           01     0.4     0.3332082    0.3083629
-#> 5           01     0.5     0.3251823    0.3089250
-#> 6           01     0.6     0.3010798    0.3089284
-#> 7           01     0.7     0.3110629    0.3093274
-#> 8           01     0.8     0.3158877    0.3096466
-#> 9           01     0.9     0.3168424    0.3095994
-#> 10          01     1.0     0.3202407    0.3096311
+#> 1           01     0.1     0.3845940    0.3500529
+#> 2           01     0.2     0.3062767    0.3640149
+#> 3           01     0.3     0.3087963    0.3667463
+#> 4           01     0.4     0.2933802    0.3723054
+#> 5           01     0.5     0.3049997    0.3746149
+#> 6           01     0.6     0.3063724    0.3720348
+#> 7           01     0.7     0.3207169    0.3842467
+#> 8           01     0.8     0.3152714    0.3829075
+#> 9           01     0.9     0.3227073    0.3863088
+#> 10          01     1.0     0.3282377    0.3873565
 #> # ... with 490 more rows
 ```
 
 We can visualize these learning curves as follows:
 
 ``` r
-library(tidyr)
-library(ggplot2)
-
 results %>% 
   select(train_p, contains("rsquare")) %>% 
   gather(source, rsquare, contains("rsquare")) %>% 
@@ -360,3 +360,47 @@ results %>%
 ```
 
 ![](README-eg_curve-1.png)
+
+The example below fits a decision tree and random forest to 20 folds of a subset of the data.
+
+``` r
+results <-  d %>% 
+  pipelearner() %>% 
+  learn_cvpairs(k = 20) %>% 
+  learn_models(c(rpart::rpart, randomForest::randomForest), 
+               visib ~ .) %>% 
+  learn()
+results
+#> # A tibble: 40 × 9
+#>    models.id cv_pairs.id train_p         fit target        model
+#>        <chr>       <chr>   <dbl>      <list>  <chr>        <chr>
+#> 1          1          01       1 <S3: rpart>  visib rpart::rpart
+#> 2          1          02       1 <S3: rpart>  visib rpart::rpart
+#> 3          1          03       1 <S3: rpart>  visib rpart::rpart
+#> 4          1          04       1 <S3: rpart>  visib rpart::rpart
+#> 5          1          05       1 <S3: rpart>  visib rpart::rpart
+#> 6          1          06       1 <S3: rpart>  visib rpart::rpart
+#> 7          1          07       1 <S3: rpart>  visib rpart::rpart
+#> 8          1          08       1 <S3: rpart>  visib rpart::rpart
+#> 9          1          09       1 <S3: rpart>  visib rpart::rpart
+#> 10         1          10       1 <S3: rpart>  visib rpart::rpart
+#> # ... with 30 more rows, and 3 more variables: params <list>,
+#> #   train <list>, test <list>
+```
+
+Then compute R-Square statistics and visualize the results:
+
+``` r
+results %>% 
+  mutate(rsquare_train = map2_dbl(fit, train, r_square),
+         rsquare_test  = map2_dbl(fit, test,  r_square)) %>% 
+  select(model, contains("rsquare")) %>% 
+  gather(source, rsquare, contains("rsquare")) %>%
+  ggplot(aes(model, rsquare, color = source)) +
+   geom_jitter(width = .05, alpha = .3) +
+   stat_summary(geom = "point", fun.y = mean, size = 4) +
+   labs(x = "Learning model",
+        y = "R Squared")
+```
+
+![](README-eg_2models-1.png)
