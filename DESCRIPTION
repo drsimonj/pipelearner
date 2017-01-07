@@ -14,7 +14,8 @@ LazyData: true
 URL: https://github.com/drsimonj/pipeliner
 BugReports: https://github.com/drsimonj/pipeliner/issues
 Imports:
-    magrittr
+    magrittr,
+    dplyr (>= 0.5.0)
 RoxygenNote: 5.0.1
 Suggests: testthat,
     knitr,
