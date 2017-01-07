@@ -17,7 +17,8 @@ Imports:
     magrittr,
     dplyr (>= 0.5.0),
     purrr (>= 0.2.2),
-    tibble (>= 1.2)
+    tibble (>= 1.2),
+    tidyr (>= 0.6.0)
 RoxygenNote: 5.0.1
 Suggests: testthat,
     knitr,
