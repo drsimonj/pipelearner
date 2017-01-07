@@ -15,7 +15,8 @@ URL: https://github.com/drsimonj/pipeliner
 BugReports: https://github.com/drsimonj/pipeliner/issues
 Imports:
     magrittr,
-    dplyr (>= 0.5.0)
+    dplyr (>= 0.5.0),
+    purrr (>= 0.2.2)
 RoxygenNote: 5.0.1
 Suggests: testthat,
     knitr,
