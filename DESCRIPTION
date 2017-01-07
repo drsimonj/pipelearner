@@ -14,11 +14,13 @@ LazyData: true
 URL: https://github.com/drsimonj/pipeliner
 BugReports: https://github.com/drsimonj/pipeliner/issues
 Imports:
-    magrittr,
+    magrittr (>= 1.5),
     dplyr (>= 0.5.0),
     purrr (>= 0.2.2),
     tibble (>= 1.2),
-    tidyr (>= 0.6.0)
+    tidyr (>= 0.6.0),
+    lazyeval (>= 0.2.0),
+    modelr (>= 0.1.0)
 RoxygenNote: 5.0.1
 Suggests: testthat,
     knitr,
