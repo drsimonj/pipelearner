@@ -15,4 +15,8 @@ models on all cross-validation training data sets, in all variations of
 training sample size, in a pipelearner object, and return the results as a
 summarized tibble.
 }
+\examples{
+pl <- pipelearner(mtcars, lm, mpg ~ .)
+learn(pl)
+}
 

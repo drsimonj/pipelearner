@@ -7,6 +7,10 @@
 #'
 #' @inheritParams pipelearner_params
 #' @export
+#'
+#' @examples
+#' pl <- pipelearner(mtcars, lm, mpg ~ .)
+#' learn(pl)
 learn <- function(pl) {
   UseMethod("learn")
 }
