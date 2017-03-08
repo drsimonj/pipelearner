@@ -46,7 +46,9 @@ fit_cvdata <- function(train_data, cv_id, models) {
   tibble::tibble(
     cv_pairs.id = cv_id,
     models.id   = models$.id,
-    fit         = purrr::invoke_map(models$.f, models$params, data = train_data)
+    fit         = purrr::invoke_map(models$.f,
+                                    models$params,
+                                    data = as.data.frame(train_data))
   )
 }
 
