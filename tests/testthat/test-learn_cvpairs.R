@@ -1,4 +1,5 @@
 context("learn_cvpairs")
+library(resamplr)
 
 df <- data.frame(a = letters, b = 1:26)
 
@@ -13,22 +14,26 @@ test_that("default setup", {
 test_that("uses right modelr call", {
   pl <- pipelearner(df)
 
-  expect_equal(learn_cvpairs(pl, n = 4)$cv_pairs %>% dim(),
-               modelr::crossv_mc(df, n = 4) %>% dim)
+  pl_cv <- learn_cvpairs(pl)$cv_pairs
+  modelr_cv <- modelr::crossv_mc(df, n = 1)
 
-  expect_equal(learn_cvpairs(pl, k = 3)$cv_pairs %>% dim(),
-               modelr::crossv_kfold(df, k = 3) %>% dim)
-
-  # k takes precedence
-  expect_equal(learn_cvpairs(pl, k = 3, n = 4)$cv_pairs %>% dim(),
-               modelr::crossv_kfold(df, k = 3) %>% dim)
-
+  expect_equal(dim(pl_cv), dim(modelr_cv))
+  expect_equal(names(pl_cv), names(modelr_cv))
 })
 
 test_that("Coerces pipelearner", {
-  lc <- learn_cvpairs(df, n = 4)
-  pl <- pipelearner(df) %>% learn_cvpairs(n = 4)
+  lc <- learn_cvpairs(df)
+  pl <- pipelearner(df) %>% learn_cvpairs()
 
   expect_equal(names(lc), names(pl))
   expect_equal(dim(lc$cv_pairs), dim(pl$cv_pairs))
+})
+
+test_that("Calls resamplr functions", {
+  pl <- pipelearner(df)
+  pl_cv <- learn_cvpairs(pl, crossv_ts, horizon = 2L, by = 3L)$cv_pairs
+  ts_cv <- crossv_ts(df, horizon = 2L, by = 3L)
+
+  expect_equal(dim(pl_cv), dim(ts_cv))
+  expect_equal(names(pl_cv), names(ts_cv))
 })

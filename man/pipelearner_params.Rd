@@ -9,4 +9,3 @@
 \description{
 Parameters shared by pipelearner methods.
 }
-

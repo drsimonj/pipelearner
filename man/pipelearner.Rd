@@ -23,4 +23,3 @@ grid of hyperparameters}
 \code{pipelearner} initializes a new pipelearner object. It is used to
 specify the input data frame to subsequent machine learning algorithms.
 }
-

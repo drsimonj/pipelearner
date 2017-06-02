@@ -4,27 +4,29 @@
 \alias{learn_cvpairs}
 \title{Cross-validation pairs}
 \usage{
-learn_cvpairs(pl, k = NULL, n = 1, test = 0.2)
+learn_cvpairs(pl, .f = function(data) modelr::crossv_mc(data, n = 1), ...)
 }
 \arguments{
 \item{pl}{pipelearner object. See \code{\link{pipelearner}}}
 
-\item{k}{Number of folds (an integer).}
+\item{.f}{a function which takes a \code{data} argument}
 
-\item{n}{Number of test-training pairs to generate (an integer).}
-
-\item{test}{Proportion of observations that should be held out for testing
-(a double).}
+\item{...}{additional parameters to be passed to \code{.f}}
 }
 \description{
-Add cross validation pairs to a pipelearner object. \code{n} random
-partitions will try to be created unless \code{k} is not NULL, in which case
-k folds will be created. See \code{\link[modelr]{crossv_mc}} for more
-details.
+Add cross validation pairs to a pipelearner object. By default will create
+a random partition of the data. Can use any function which creates
+\code{train} and \code{test} columns of \code{resample} objects and column
+of \code{id} integers. See \code{\link[modelr]{crossv_mc}} and
+\code{\link[modelr]{resample}} for details.
 }
 \details{
 Will expect a pipelearner object, but will also accept a data frame for the
 parameter \code{pl}. In the case that a data frame is used, it will first
 coerce it to a pipelearner object via \code{\link{pipelearner}}.
 }
-
+\examples{
+pl <- pipelearner(mtcars)
+learn_cvpairs(pl, modelr::crossv_kfold, k = 4)
+learn_cvpairs(pl, resamplr::holdout_frac, size = 0.3, K = 5L)
+}

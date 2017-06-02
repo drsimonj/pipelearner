@@ -17,4 +17,3 @@ at the beginning of a resample object. For example, create a resample object
 pointing to the the first .3 (30\%) or .5 (50\%) of rows pointed to by the
 original resample object.
 }
-
