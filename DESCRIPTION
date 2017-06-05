@@ -1,6 +1,6 @@
 Package: pipelearner
 Type: Package
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Title: Machine learning pipelines
 Description: Functions to create custom pipelines for machine learning.
 Authors@R: c(
@@ -20,10 +20,10 @@ Imports:
     tibble (>= 1.2),
     tidyr (>= 0.6.0),
     lazyeval (>= 0.2.0),
-    modelr (>= 0.1.0)
+    modelr (>= 0.1.0),
+    assertthat (>= 0.2.0)
 RoxygenNote: 6.0.1
 Suggests: testthat,
     knitr,
-    rmarkdown,
-    resamplr
+    rmarkdown
 VignetteBuilder: knitr

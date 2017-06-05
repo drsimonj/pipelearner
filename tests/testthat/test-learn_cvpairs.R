@@ -1,5 +1,4 @@
 context("learn_cvpairs")
-library(resamplr)
 
 df <- data.frame(a = letters, b = 1:26)
 
@@ -11,11 +10,40 @@ test_that("default setup", {
   expect_equal(nrow(pl1$cv_pairs$train[[1]]), nrow(pl2$cv_pairs$train[[1]]))
 })
 
-test_that("uses right modelr call", {
+test_that("uses correct call with .f missing", {
   pl <- pipelearner(df)
 
-  pl_cv <- learn_cvpairs(pl)$cv_pairs
-  modelr_cv <- modelr::crossv_mc(df, n = 1)
+  pl_cv <- learn_cvpairs(pl, n = 4)$cv_pairs
+  modelr_cv <- modelr::crossv_mc(df, n = 4)
+
+  expect_equal(dim(pl_cv), dim(modelr_cv))
+  expect_equal(names(pl_cv), names(modelr_cv))
+
+  pl_cv <- learn_cvpairs(pl, k = 3)$cv_pairs
+  modelr_cv <- modelr::crossv_kfold(df, k = 3)
+
+  expect_equal(dim(pl_cv), dim(modelr_cv))
+  expect_equal(names(pl_cv), names(modelr_cv))
+
+  # k takes precedence
+  pl_cv <- learn_cvpairs(pl, k = 3, n = 4)$cv_pairs
+  modelr_cv <- modelr::crossv_kfold(df, k = 3)
+
+  expect_equal(dim(pl_cv), dim(modelr_cv))
+  expect_equal(names(pl_cv), names(modelr_cv))
+})
+
+test_that("Uses correct call when calling crossv functions directly", {
+  pl <- pipelearner(df)
+
+  pl_cv <- learn_cvpairs(pl, crossv_kfold, k = 3)$cv_pairs
+  modelr_cv <- modelr::crossv_kfold(df, k = 3)
+
+  expect_equal(dim(pl_cv), dim(modelr_cv))
+  expect_equal(names(pl_cv), names(modelr_cv))
+
+  pl_cv <- learn_cvpairs(pl, crossv_mc, n = 4)$cv_pairs
+  modelr_cv <- modelr::crossv_mc(df, n = 4)
 
   expect_equal(dim(pl_cv), dim(modelr_cv))
   expect_equal(names(pl_cv), names(modelr_cv))
@@ -31,8 +59,8 @@ test_that("Coerces pipelearner", {
 
 test_that("Calls resamplr functions", {
   pl <- pipelearner(df)
-  pl_cv <- learn_cvpairs(pl, crossv_ts, horizon = 2L, by = 3L)$cv_pairs
-  ts_cv <- crossv_ts(df, horizon = 2L, by = 3L)
+  pl_cv <- learn_cvpairs(pl, resamplr::crossv_ts, horizon = 2L, by = 3L)$cv_pairs
+  ts_cv <- resamplr::crossv_ts(df, horizon = 2L, by = 3L)
 
   expect_equal(dim(pl_cv), dim(ts_cv))
   expect_equal(names(pl_cv), names(ts_cv))

@@ -8,6 +8,14 @@
 #' @usage lhs \%>\% rhs
 NULL
 
+#' @importFrom modelr crossv_mc
+#' @export
+modelr::crossv_mc
+
+#' @importFrom modelr crossv_kfold
+#' @export
+modelr::crossv_kfold
+
 
 #' Proportion of resample object
 #'

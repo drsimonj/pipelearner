@@ -4,7 +4,7 @@
 \alias{learn_cvpairs}
 \title{Cross-validation pairs}
 \usage{
-learn_cvpairs(pl, .f = function(data) modelr::crossv_mc(data, n = 1), ...)
+learn_cvpairs(pl, .f, ...)
 }
 \arguments{
 \item{pl}{pipelearner object. See \code{\link{pipelearner}}}
@@ -15,10 +15,13 @@ learn_cvpairs(pl, .f = function(data) modelr::crossv_mc(data, n = 1), ...)
 }
 \description{
 Add cross validation pairs to a pipelearner object. By default will create
-a random partition of the data. Can use any function which creates
-\code{train} and \code{test} columns of \code{resample} objects and column
-of \code{id} integers. See \code{\link[modelr]{crossv_mc}} and
-\code{\link[modelr]{resample}} for details.
+a random partition of the data. Can use any function which returns a data
+data frame with three columns: \code{train}, \code{test}, and \code{.id}.
+\code{test} and \code{train} are list-columns with each entry of type
+\code{resample}. \code{.id} is an atomic vector. If no function is specified,
+random partitions will try to be created unless \code{k} is not NULL, in
+which case k folds will be created. See \code{\link[modelr]{crossv_mc}} for
+more details.
 }
 \details{
 Will expect a pipelearner object, but will also accept a data frame for the
@@ -27,6 +30,5 @@ coerce it to a pipelearner object via \code{\link{pipelearner}}.
 }
 \examples{
 pl <- pipelearner(mtcars)
-learn_cvpairs(pl, modelr::crossv_kfold, k = 4)
-learn_cvpairs(pl, resamplr::holdout_frac, size = 0.3, K = 5L)
+learn_cvpairs(pl, crossv_kfold, k = 4)
 }
