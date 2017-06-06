@@ -30,4 +30,3 @@ because it would require us to save these subsamples (taking up more space)
 despite the fact that the training data is already a random sample (see
 \code{\link{learn_cvpairs}}).
 }
-

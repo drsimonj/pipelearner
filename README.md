@@ -118,20 +118,19 @@ pl %>% learn()
 
 ### Cross-validation pairs
 
-Cross-validation pairs can be customized with `learn_cvpairs()`. The following implements k-fold cross-validation, creating five folds:
+Cross-validation pairs can be customized with `learn_cvpairs()`. The following implements k-fold cross validation with `k = 4`.
 
 ``` r
 pl %>%
-  learn_cvpairs(k = 5) %>% 
+  learn_cvpairs(crossv_kfold, k = 4) %>% 
   learn()
-#> # A tibble: 5 × 9
+#> # A tibble: 4 × 9
 #>   models.id cv_pairs.id train_p      fit       target model     params
 #>       <chr>       <chr>   <dbl>   <list>        <chr> <chr>     <list>
 #> 1         1           1       1 <S3: lm> Sepal.Length    lm <list [1]>
 #> 2         1           2       1 <S3: lm> Sepal.Length    lm <list [1]>
 #> 3         1           3       1 <S3: lm> Sepal.Length    lm <list [1]>
 #> 4         1           4       1 <S3: lm> Sepal.Length    lm <list [1]>
-#> 5         1           5       1 <S3: lm> Sepal.Length    lm <list [1]>
 #> # ... with 2 more variables: train <list>, test <list>
 ```
 
@@ -237,7 +236,7 @@ After initialization, pipelearner functions can be combined in a single pipeline
 ``` r
 iris %>% 
   pipelearner() %>%
-  learn_cvpairs(n = 50) %>%
+  learn_cvpairs(crossv_mc, n = 50) %>%
   learn_curves(seq(.5, 1, by = .1)) %>% 
   learn_models(lm, Sepal.Width ~ .*.) %>% 
   learn_models(rpart::rpart, Sepal.Width ~ .) %>% 
@@ -298,7 +297,7 @@ d <- weather %>%
 
 results <- d %>% 
   pipelearner() %>% 
-  learn_cvpairs(n = 50, test = .15) %>% 
+  learn_cvpairs(crossv_mc, n = 50, test = .15) %>% 
   learn_curves(seq(.1, 1, by = .1)) %>% 
   learn_models(lm, visib ~ .) %>% 
   learn()
@@ -332,16 +331,16 @@ results %>% select(cv_pairs.id, train_p, contains("rsquare"))
 #> # A tibble: 500 × 4
 #>    cv_pairs.id train_p rsquare_train rsquare_test
 #>          <chr>   <dbl>         <dbl>        <dbl>
-#> 1           01     0.1     0.3845940    0.3500529
-#> 2           01     0.2     0.3062767    0.3640149
-#> 3           01     0.3     0.3087963    0.3667463
-#> 4           01     0.4     0.2933802    0.3723054
-#> 5           01     0.5     0.3049997    0.3746149
-#> 6           01     0.6     0.3063724    0.3720348
-#> 7           01     0.7     0.3207169    0.3842467
-#> 8           01     0.8     0.3152714    0.3829075
-#> 9           01     0.9     0.3227073    0.3863088
-#> 10          01     1.0     0.3282377    0.3873565
+#> 1           01     0.1     0.3668098    0.3539125
+#> 2           01     0.2     0.4067336    0.3532530
+#> 3           01     0.3     0.3807700    0.3502037
+#> 4           01     0.4     0.3748297    0.3432767
+#> 5           01     0.5     0.3486239    0.3374103
+#> 6           01     0.6     0.3620430    0.3309106
+#> 7           01     0.7     0.3571253    0.3277946
+#> 8           01     0.8     0.3444167    0.3301699
+#> 9           01     0.9     0.3410921    0.3315772
+#> 10          01     1.0     0.3406082    0.3336214
 #> # ... with 490 more rows
 ```
 
@@ -366,7 +365,7 @@ The example below fits a decision tree and random forest to 20 folds of a subset
 ``` r
 results <-  d %>% 
   pipelearner() %>% 
-  learn_cvpairs(k = 20) %>% 
+  learn_cvpairs(crossv_kfold, k = 20) %>% 
   learn_models(c(rpart::rpart, randomForest::randomForest), 
                visib ~ .) %>% 
   learn()

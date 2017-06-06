@@ -13,4 +13,3 @@
 Produces true and predicted values for all training and test sets, for all
 models, in a pipelearner object.
 }
-

@@ -4,27 +4,44 @@
 \alias{learn_cvpairs}
 \title{Cross-validation pairs}
 \usage{
-learn_cvpairs(pl, k = NULL, n = 1, test = 0.2)
+learn_cvpairs(pl, .f, ...)
 }
 \arguments{
 \item{pl}{pipelearner object. See \code{\link{pipelearner}}}
 
-\item{k}{Number of folds (an integer).}
+\item{.f}{function like \code{\link[modelr]{crossv_mc}} that partitions a
+data.frame into test-training splits. \code{.f} must have an argument
+\code{data}, which takes a \code{data.frame}.  \code{.f} must return a
+\code{data.frame} with two list-columns of resample objects (\code{"train"}
+and \code{"test"}) and a column of unique atomic values (\code{".id"}). of
+unique values.}
 
-\item{n}{Number of test-training pairs to generate (an integer).}
-
-\item{test}{Proportion of observations that should be held out for testing
-(a double).}
+\item{...}{additional parameters to be passed to \code{.f}}
 }
 \description{
-Add cross validation pairs to a pipelearner object. \code{n} random
-partitions will try to be created unless \code{k} is not NULL, in which case
-k folds will be created. See \code{\link[modelr]{crossv_mc}} for more
-details.
+Customise cross validation pairs of training and test data for pipelearner
+object. By default, a single cross validation pair will be created with a
+random 80% of the data being assigned for training and the other 20% of
+testing. \code{learn_cvpairs} allows this to be customised through the use of
+a function that takes a \code{data.frame} as input and returns a
+\code{data.frame} with three columns: \code{train}, \code{test}, and
+\code{.id}. \code{train} and \code{test} must be list-columns of
+\code{\link[modelr]{resample}} objects, and \code{.id} is an atomic vector of
+unique values.
 }
 \details{
 Will expect a pipelearner object, but will also accept a data frame for the
 parameter \code{pl}. In the case that a data frame is used, it will first
 coerce it to a pipelearner object via \code{\link{pipelearner}}.
+}
+\examples{
+# Five-fold cross validation
+pl <- pipelearner(mtcars)
+learn_cvpairs(pl, crossv_kfold, k = 5)
+
+}
+\seealso{
+Example functions that can be used for argument \code{.f}:
+  \code{\link[modelr]{crossv_mc}}, \code{\link[modelr]{crossv_kfold}}
 }
 

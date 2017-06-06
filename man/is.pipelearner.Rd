@@ -13,4 +13,3 @@ is.pipelearner(x)
 Reports whether x is a pipelearner object
 }
 \keyword{internal}
-
