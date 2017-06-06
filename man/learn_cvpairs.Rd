@@ -4,7 +4,7 @@
 \alias{learn_cvpairs}
 \title{Cross-validation pairs}
 \usage{
-learn_cvpairs(pl, .f, ...)
+learn_cvpairs(pl, .f = NULL, ...)
 }
 \arguments{
 \item{pl}{pipelearner object. See \code{\link{pipelearner}}}
@@ -19,9 +19,8 @@ a random partition of the data. Can use any function which returns a data
 data frame with three columns: \code{train}, \code{test}, and \code{.id}.
 \code{test} and \code{train} are list-columns with each entry of type
 \code{resample}. \code{.id} is an atomic vector. If no function is specified,
-random partitions will try to be created unless \code{k} is not NULL, in
-which case k folds will be created. See \code{\link[modelr]{crossv_mc}} for
-more details.
+will create a random partition with proportion 0.2 reserved for testing data.
+See \code{\link[modelr]{crossv_mc}} for more details.
 }
 \details{
 Will expect a pipelearner object, but will also accept a data frame for the

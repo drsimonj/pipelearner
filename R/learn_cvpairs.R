@@ -20,18 +20,18 @@
 #' pl <- pipelearner(mtcars)
 #' learn_cvpairs(pl, crossv_kfold, k = 4)
 #' @export
-learn_cvpairs <- function(pl, .f, ...) {
+learn_cvpairs <- function(pl, .f = NULL, ...) {
   UseMethod("learn_cvpairs")
 }
 
 #' @export
-learn_cvpairs.default <-  function(pl, .f, ...) {
+learn_cvpairs.default <-  function(pl, .f = NULL, ...) {
   learn_cvpairs.pipelearner(pipelearner(pl), .f, ...)
 }
 
 #' @export
-learn_cvpairs.pipelearner <- function(pl, .f, ...) {
-  if (missing(.f)) {
+learn_cvpairs.pipelearner <- function(pl, .f = NULL, ...) {
+  if (is.null(.f)) {
     pl$cv_pairs <- crossv_mc(pl$data, n = 1L, test = 0.2, id = ".id")
     return (pl)
   }
