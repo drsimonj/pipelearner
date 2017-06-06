@@ -43,12 +43,3 @@ test_that("Coerces pipelearner", {
   expect_equal(names(lc), names(pl))
   expect_equal(dim(lc$cv_pairs), dim(pl$cv_pairs))
 })
-
-test_that("Calls resamplr functions", {
-  pl <- pipelearner(df)
-  pl_cv <- learn_cvpairs(pl, resamplr::crossv_ts, horizon = 2L, by = 3L)$cv_pairs
-  ts_cv <- resamplr::crossv_ts(df, horizon = 2L, by = 3L)
-
-  expect_equal(dim(pl_cv), dim(ts_cv))
-  expect_equal(names(pl_cv), names(ts_cv))
-})
