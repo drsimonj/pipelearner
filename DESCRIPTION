@@ -1,8 +1,8 @@
 Package: pipelearner
 Type: Package
 Version: 0.0.0.9001
-Title: Machine learning pipelines
-Description: Functions to create custom pipelines for machine learning.
+Title: Tidy machine learning pipelines
+Description: Functions to create machine learning pipelines in a tidy framework.
 Authors@R: c(
   person("Simon", "Jackson", email = "drsimonjackson@gmail.com", role = c("aut", "cre"))
   )
