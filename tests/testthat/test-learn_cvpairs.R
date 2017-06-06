@@ -13,21 +13,8 @@ test_that("default setup", {
 test_that("uses correct call with .f missing", {
   pl <- pipelearner(df)
 
-  pl_cv <- learn_cvpairs(pl, n = 4)$cv_pairs
-  modelr_cv <- modelr::crossv_mc(df, n = 4)
-
-  expect_equal(dim(pl_cv), dim(modelr_cv))
-  expect_equal(names(pl_cv), names(modelr_cv))
-
-  pl_cv <- learn_cvpairs(pl, k = 3)$cv_pairs
-  modelr_cv <- modelr::crossv_kfold(df, k = 3)
-
-  expect_equal(dim(pl_cv), dim(modelr_cv))
-  expect_equal(names(pl_cv), names(modelr_cv))
-
-  # k takes precedence
-  pl_cv <- learn_cvpairs(pl, k = 3, n = 4)$cv_pairs
-  modelr_cv <- modelr::crossv_kfold(df, k = 3)
+  pl_cv <- learn_cvpairs(pl)$cv_pairs
+  modelr_cv <- modelr::crossv_mc(df, n = 1L, test = 0.2)
 
   expect_equal(dim(pl_cv), dim(modelr_cv))
   expect_equal(names(pl_cv), names(modelr_cv))
