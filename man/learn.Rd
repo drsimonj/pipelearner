@@ -19,3 +19,4 @@ summarized tibble.
 pl <- pipelearner(mtcars, lm, mpg ~ .)
 learn(pl)
 }
+

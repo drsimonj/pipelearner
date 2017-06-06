@@ -2,12 +2,10 @@
 % Please edit documentation in R/utils.R
 \docType{import}
 \name{reexports}
-\alias{reexports}
+\alias{crossv_kfold}
 \alias{crossv_mc}
 \alias{reexports}
-\alias{crossv_kfold}
 \title{Objects exported from other packages}
-\keyword{internal}
 \description{
 These objects are imported from other packages. Follow the links
 below to see their documentation.
@@ -15,4 +13,5 @@ below to see their documentation.
 \describe{
   \item{modelr}{\code{\link[modelr]{crossv_mc}}, \code{\link[modelr]{crossv_kfold}}}
 }}
+\keyword{internal}
 
